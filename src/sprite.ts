@@ -15,8 +15,8 @@ export class Sprite {
   private _frames: number;
   private readonly _absolute: boolean;
   private readonly _centered: boolean;
-  public readonly x: number;
-  public readonly y: number;
+  public x: number;
+  public y: number;
   private _width: number = 0;
   private _height: number = 0;
   private _currentFrame: number = 0;

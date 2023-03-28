@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+GameBackend/bin
+GameBackend/obj
+GameBackend/wwwroot/
+.vs

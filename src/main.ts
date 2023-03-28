@@ -4,6 +4,7 @@ import { Sprite } from "./sprite";
 import collisions from "../data/collisions.json";
 import { Boundary } from "./Boundary";
 import { rectangularCollision } from "./collisions";
+import * as signalR from "@microsoft/signalr";
 
 const indexIntoCollisions = (row: number, col: number) => {
   const index = col * collisions.width + row;
@@ -14,8 +15,16 @@ const obstacleHere = (row: number, col: number) => {
   return indexIntoCollisions(row, col) != 0;
 };
 
+// signalR
+const connection = new signalR.HubConnectionBuilder()
+  .withUrl("http://localhost:5169/chat-hub")
+  .build();
+const username = new Date().getTime();
+
 const canvas = document.querySelector("#app") as HTMLCanvasElement;
 const speed = 3;
+
+const otherPlayers: Record<string, Sprite> = {};
 
 const playerSprites = {
   down: new Sprite({
@@ -104,6 +113,11 @@ if (!canvas) {
       // for (let boundary of boundaries) {
       //   boundary.draw(ctx, camera);
       // }
+
+      var keys = Object.keys(otherPlayers);
+      for (let i = 0; i < keys.length; i++) {
+        otherPlayers[keys[i]].draw(ctx, camera);
+      }
     };
 
     const keyPressed: Record<string, boolean> = {};
@@ -137,6 +151,13 @@ if (!canvas) {
         noMovement = false;
         direction.x -= speed;
       }
+
+      connection.send(
+        "updatedPosition",
+        username,
+        camera.x + getCurrentSprite().x,
+        camera.y + getCurrentSprite().y
+      );
 
       camera.x += direction.x;
       camera.y += direction.y;
@@ -212,3 +233,41 @@ if (!canvas) {
     animate();
   }
 }
+
+// Connection stuffs
+
+connection.on("messageReceived", (username: string, message: string) => {
+  console.log("Author:", username, " Message:", message);
+});
+
+connection.on("updatedPosition", (inUsername: string, x: number, y: number) => {
+  if (inUsername == username.toString()) {
+    return;
+  }
+
+  if (!otherPlayers[inUsername]) {
+    otherPlayers[inUsername] = new Sprite({
+      url: "/assets/playerDown.png",
+      x: x,
+      y: y,
+      frames: 4,
+    });
+  }
+
+  otherPlayers[inUsername].x = x;
+  otherPlayers[inUsername].y = y;
+});
+
+connection.start().catch((err) => document.write(err));
+
+const send = () => {
+  const inputElement = document.querySelector("#message") as HTMLInputElement;
+  const value = inputElement.value;
+  connection
+    .send("newMessage", username, value)
+    .then(() => (inputElement.value = ""));
+};
+
+document.querySelector("#sendButton")?.addEventListener("click", () => {
+  send();
+});
