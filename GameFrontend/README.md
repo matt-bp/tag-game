@@ -19,3 +19,7 @@ https://learn.microsoft.com/en-us/iis/get-started/whats-new-in-iis-10/http2-on-i
 I want to run this on the dev server. People can go to the url, see the webpage, and the websocket server will handle the game and everything.
 
 I might just want to start with signalR, and then dive deeper if it's not what I need.
+
+
+https://stackoverflow.com/questions/64677212/how-to-configure-proxy-in-vite
+- Got proxying working with this
