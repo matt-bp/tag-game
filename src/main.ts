@@ -17,7 +17,7 @@ const obstacleHere = (row: number, col: number) => {
 
 // signalR
 const connection = new signalR.HubConnectionBuilder()
-  .withUrl("http://localhost:5169/chat-hub")
+  .withUrl("/api/chat-hub")
   .build();
 const username = new Date().getTime();
 
@@ -108,16 +108,16 @@ if (!canvas) {
 
       getCurrentSprite().draw(ctx, camera);
 
+      var keys = Object.keys(otherPlayers);
+      for (let i = 0; i < keys.length; i++) {
+        otherPlayers[keys[i]].draw(ctx, camera);
+      }
+
       gameMapForeground.draw(ctx, camera);
 
       // for (let boundary of boundaries) {
       //   boundary.draw(ctx, camera);
       // }
-
-      var keys = Object.keys(otherPlayers);
-      for (let i = 0; i < keys.length; i++) {
-        otherPlayers[keys[i]].draw(ctx, camera);
-      }
     };
 
     const keyPressed: Record<string, boolean> = {};
@@ -152,12 +152,14 @@ if (!canvas) {
         direction.x -= speed;
       }
 
-      connection.send(
-        "updatedPosition",
-        username,
-        camera.x + getCurrentSprite().x,
-        camera.y + getCurrentSprite().y
-      );
+      if (!noMovement) {
+        connection.send(
+          "updatedPosition",
+          username,
+          camera.x + getCurrentSprite().x,
+          camera.y + getCurrentSprite().y
+        );
+      }
 
       camera.x += direction.x;
       camera.y += direction.y;
