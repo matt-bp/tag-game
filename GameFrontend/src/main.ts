@@ -30,7 +30,7 @@ type Direction = "down" | "right" | "up" | "left";
 type MultiSprite = Record<Direction, Sprite>;
 
 // const otherPlayersMultiSprites: Record<string, MultiSprite> = {};
-// const otherPlayersDirection: Record<string, Direction> = {};
+const otherPlayersDirection: Record<string, Direction> = {};
 
 const createMultiSprite = (x: number, y: number) => {
   return {
@@ -264,16 +264,26 @@ connection.on(
       return;
     }
 
-    if (!otherPlayers[inUsername]) {
+    if (
+      !otherPlayers[inUsername] ||
+      direction != otherPlayersDirection[inUsername]
+    ) {
+      const mapDirectionToSpriteName = {
+        up: "playerUp",
+        down: "playerDown",
+        left: "playerLeft",
+        right: "playerRight",
+      };
+
       otherPlayers[inUsername] = new Sprite({
-        url: "/assets/playerDown.png",
+        url: `/assets/${mapDirectionToSpriteName[direction]}.png`,
         x: x,
         y: y,
         frames: 4,
       });
-    }
 
-    console.log(inUsername, " is going the direction ", direction);
+      otherPlayersDirection[inUsername] = direction;
+    }
 
     otherPlayers[inUsername].x = x;
     otherPlayers[inUsername].y = y;
