@@ -162,15 +162,6 @@ if (!canvas) {
         direction.x -= speed;
       }
 
-      if (!noMovement) {
-        connection.send(
-          "updatedPosition",
-          username,
-          camera.x + getCurrentSprite().x,
-          camera.y + getCurrentSprite().y
-        );
-      }
-
       camera.x += direction.x;
       camera.y += direction.y;
     };
@@ -223,8 +214,21 @@ if (!canvas) {
       getCurrentSprite().updateAnimation();
     };
 
+    const sendSocketInfo = () => {
+      if (noMovement) return;
+
+      connection.send(
+        "updatedPosition",
+        username,
+        camera.x + getCurrentSprite().x,
+        camera.y + getCurrentSprite().y
+      );
+    };
+
     const animate = () => {
       processInput();
+
+      sendSocketInfo();
 
       detectCollisions();
 
