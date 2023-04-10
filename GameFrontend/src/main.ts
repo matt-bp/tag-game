@@ -20,6 +20,8 @@ const connection = new signalR.HubConnectionBuilder()
   .withUrl("/api/chat-hub")
   .build();
 const username = new Date().getTime();
+let connected = false;
+let didSendStoppedMoving = false;
 
 const canvas = document.querySelector("#app") as HTMLCanvasElement;
 const speed = 3;
@@ -31,6 +33,7 @@ type MultiSprite = Record<Direction, Sprite>;
 
 // const otherPlayersMultiSprites: Record<string, MultiSprite> = {};
 const otherPlayersDirection: Record<string, Direction> = {};
+const otherPlayerDidMove: Record<string, boolean> = {};
 
 const createMultiSprite = (x: number, y: number) => {
   return {
@@ -131,34 +134,34 @@ if (!canvas) {
     };
 
     const keyPressed: Record<string, boolean> = {};
-    let noMovement = true;
+    let didMove = false;
 
     const processInput = () => {
       let direction = { x: 0, y: 0 };
 
-      noMovement = true;
+      didMove = false;
 
       if (keyPressed["s"]) {
         currentPlayerSprite = "down";
-        noMovement = false;
+        didMove = true;
         direction.y += speed;
       }
 
       if (keyPressed["w"]) {
         currentPlayerSprite = "up";
-        noMovement = false;
+        didMove = true;
         direction.y -= speed;
       }
 
       if (keyPressed["d"]) {
         currentPlayerSprite = "right";
-        noMovement = false;
+        didMove = true;
         direction.x += speed;
       }
 
       if (keyPressed["a"]) {
         currentPlayerSprite = "left";
-        noMovement = false;
+        didMove = true;
         direction.x -= speed;
       }
 
@@ -210,19 +213,39 @@ if (!canvas) {
     };
 
     const updateAnimations = () => {
-      if (noMovement) return;
+      var keys = Object.keys(otherPlayers);
+      for (let i = 0; i < keys.length; i++) {
+        const username = keys[i];
+
+        if (otherPlayerDidMove[username]) {
+          otherPlayers[keys[i]].updateAnimation();
+        }
+      }
+
+      if (!didMove) return;
       getCurrentSprite().updateAnimation();
     };
 
     const sendSocketInfo = () => {
-      if (noMovement) return;
+      if (!connected) return;
+
+      if (!didMove && !didSendStoppedMoving) {
+        didSendStoppedMoving = true;
+        connection.send("playerStoppedMoving", username);
+        return;
+      }
+
+      if (!didMove) return;
+
+      didSendStoppedMoving = false;
 
       connection.send(
         "updatedPosition",
         username,
         camera.x + getCurrentSprite().x,
         camera.y + getCurrentSprite().y,
-        currentPlayerSprite
+        currentPlayerSprite,
+        didMove
       );
     };
 
@@ -259,7 +282,13 @@ connection.on("messageReceived", (username: string, message: string) => {
 
 connection.on(
   "updatedPosition",
-  (inUsername: string, x: number, y: number, direction: Direction) => {
+  (
+    inUsername: string,
+    x: number,
+    y: number,
+    direction: Direction,
+    otherDidMove: boolean
+  ) => {
     if (inUsername == username.toString()) {
       return;
     }
@@ -285,12 +314,25 @@ connection.on(
       otherPlayersDirection[inUsername] = direction;
     }
 
+    otherPlayerDidMove[inUsername] = otherDidMove;
+
     otherPlayers[inUsername].x = x;
     otherPlayers[inUsername].y = y;
   }
 );
 
-connection.start().catch((err) => document.write(err));
+connection.on("playerStoppedMoving", (inUsername: string) => {
+  if (inUsername == username.toString()) return;
+
+  otherPlayerDidMove[inUsername] = false;
+});
+
+connection
+  .start()
+  .then(() => {
+    connected = true;
+  })
+  .catch((err) => document.write(err));
 
 const send = () => {
   const inputElement = document.querySelector("#message") as HTMLInputElement;
