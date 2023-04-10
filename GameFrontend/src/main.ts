@@ -26,36 +26,46 @@ const speed = 3;
 
 const otherPlayers: Record<string, Sprite> = {};
 
-const playerSprites = {
-  down: new Sprite({
-    url: "/assets/playerDown.png",
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    frames: 4,
-    absolute: true,
-  }),
-  right: new Sprite({
-    url: "/assets/playerRight.png",
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    frames: 4,
-    absolute: true,
-  }),
-  up: new Sprite({
-    url: "/assets/playerUp.png",
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    frames: 4,
-    absolute: true,
-  }),
-  left: new Sprite({
-    url: "/assets/playerLeft.png",
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    frames: 4,
-    absolute: true,
-  }),
+type Direction = "down" | "right" | "up" | "left";
+type MultiSprite = Record<Direction, Sprite>;
+
+// const otherPlayersMultiSprites: Record<string, MultiSprite> = {};
+// const otherPlayersDirection: Record<string, Direction> = {};
+
+const createMultiSprite = (x: number, y: number) => {
+  return {
+    down: new Sprite({
+      url: "/assets/playerDown.png",
+      x: x,
+      y: y,
+      frames: 4,
+      absolute: true,
+    }),
+    right: new Sprite({
+      url: "/assets/playerRight.png",
+      x: x,
+      y: y,
+      frames: 4,
+      absolute: true,
+    }),
+    up: new Sprite({
+      url: "/assets/playerUp.png",
+      x: x,
+      y: y,
+      frames: 4,
+      absolute: true,
+    }),
+    left: new Sprite({
+      url: "/assets/playerLeft.png",
+      x: x,
+      y: y,
+      frames: 4,
+      absolute: true,
+    }),
+  } as MultiSprite;
 };
+
+const playerSprites = createMultiSprite(canvas.width / 2, canvas.height / 2);
 
 let currentPlayerSprite: "down" | "right" | "up" | "left" = "down";
 
