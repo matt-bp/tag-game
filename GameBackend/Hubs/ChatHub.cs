@@ -6,5 +6,5 @@ public class ChatHub : Hub
 {
     public async Task NewMessage(long username, string message) => await Clients.All.SendAsync("messageReceived", username, message);
 
-    public async Task UpdatedPosition(long username, int x, int y) => await Clients.All.SendAsync("updatedPosition", username, x, y);
+    public async Task UpdatedPosition(long username, int x, int y, string direction) => await Clients.All.SendAsync("updatedPosition", username, x, y, direction);
 }

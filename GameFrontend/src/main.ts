@@ -221,7 +221,8 @@ if (!canvas) {
         "updatedPosition",
         username,
         camera.x + getCurrentSprite().x,
-        camera.y + getCurrentSprite().y
+        camera.y + getCurrentSprite().y,
+        currentPlayerSprite
       );
     };
 
@@ -256,23 +257,28 @@ connection.on("messageReceived", (username: string, message: string) => {
   console.log("Author:", username, " Message:", message);
 });
 
-connection.on("updatedPosition", (inUsername: string, x: number, y: number) => {
-  if (inUsername == username.toString()) {
-    return;
-  }
+connection.on(
+  "updatedPosition",
+  (inUsername: string, x: number, y: number, direction: Direction) => {
+    if (inUsername == username.toString()) {
+      return;
+    }
 
-  if (!otherPlayers[inUsername]) {
-    otherPlayers[inUsername] = new Sprite({
-      url: "/assets/playerDown.png",
-      x: x,
-      y: y,
-      frames: 4,
-    });
-  }
+    if (!otherPlayers[inUsername]) {
+      otherPlayers[inUsername] = new Sprite({
+        url: "/assets/playerDown.png",
+        x: x,
+        y: y,
+        frames: 4,
+      });
+    }
 
-  otherPlayers[inUsername].x = x;
-  otherPlayers[inUsername].y = y;
-});
+    console.log(inUsername, " is going the direction ", direction);
+
+    otherPlayers[inUsername].x = x;
+    otherPlayers[inUsername].y = y;
+  }
+);
 
 connection.start().catch((err) => document.write(err));
 
