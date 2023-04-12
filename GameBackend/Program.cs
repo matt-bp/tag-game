@@ -1,8 +1,10 @@
 using GameBackend.Hubs;
+using GameBackend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSignalR();
+builder.Services.AddHostedService<CollisionService>();
 
 var app = builder.Build();
 

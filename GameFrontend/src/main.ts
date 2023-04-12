@@ -327,6 +327,10 @@ connection.on("playerStoppedMoving", (inUsername: string) => {
   otherPlayerDidMove[inUsername] = false;
 });
 
+connection.on("collisionCheck", () => {
+  console.log("collisionCheck from server");
+});
+
 connection
   .start()
   .then(() => {
