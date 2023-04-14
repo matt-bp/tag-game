@@ -239,12 +239,13 @@ if (!canvas) {
 
       didSendStoppedMoving = false;
 
+      if (username == "") return;
+
       connection.send(
         "updatedPosition",
         camera.x + getCurrentSprite().x,
         camera.y + getCurrentSprite().y,
-        currentPlayerSprite,
-        didMove
+        currentPlayerSprite
       );
     };
 
@@ -280,7 +281,7 @@ connection.on("messageReceived", (username: string, message: string) => {
 });
 
 connection.on(
-  "updatedPosition",
+  "updatedPlayer",
   (
     inUsername: string,
     x: number,
@@ -288,11 +289,19 @@ connection.on(
     direction: Direction,
     otherDidMove: boolean
   ) => {
-    if (inUsername == username) {
+    if (username == "" || inUsername == username) {
       return;
     }
 
-    console.log("updatedPosition", inUsername, x, y, direction, otherDidMove);
+    console.log(
+      "updatedPlayer",
+      username,
+      inUsername,
+      x,
+      y,
+      direction,
+      otherDidMove
+    );
 
     if (
       !otherPlayers[inUsername] ||
@@ -322,12 +331,6 @@ connection.on(
   }
 );
 
-connection.on("playerStoppedMoving", (inUsername: string) => {
-  if (inUsername == username.toString()) return;
-
-  otherPlayerDidMove[inUsername] = false;
-});
-
 connection.on("collisionCheck", () => {
   console.log("collisionCheck from server");
 });
@@ -343,7 +346,7 @@ connection.on("playerDisconnected", (inUsername: string) => {
 
 connection.on("recieveConnectionId", (newUsername: string) => {
   username = newUsername;
-  console.log("Username:", username);
+  console.log("My username:", username);
 });
 
 connection

@@ -2,18 +2,24 @@
 
 namespace GameBackend.Services
 {
-    public class CollisionJob
+    public class PositionJob
     {
         public string ConnectionId { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
         public string Direction { get; set; }
-        public bool DidMove { get; set; }
-        public DateTime Timestamp { get; set; }
     }
 
-    public class BackgroundCollisionJobs
+    public class IdJob
     {
-        public ConcurrentQueue<CollisionJob> CollisionJobs { get; set; } = new();
+        public string ConnectionId { get; set; }
+    }
+
+    public class BackgroundJobs
+    {
+        public ConcurrentQueue<PositionJob> Positions { get; set; } = new();
+        public ConcurrentQueue<IdJob> DisconnectedUsers { get; set; } = new();
+        public ConcurrentQueue<IdJob> NewPlayers { get; set; } = new();
+        public ConcurrentQueue<IdJob> PlayersThatStoppedMoving { get; set; } = new();
     }
 }

@@ -4,8 +4,8 @@ using GameBackend.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSignalR();
-builder.Services.AddHostedService<CollisionService>();
-builder.Services.AddSingleton<BackgroundCollisionJobs>();
+builder.Services.AddHostedService<GameService>();
+builder.Services.AddSingleton<BackgroundJobs>();
 
 var app = builder.Build();
 
