@@ -288,10 +288,11 @@ connection.on(
     direction: Direction,
     otherDidMove: boolean
   ) => {
-    console.log("updatedPosition", inUsername, x, y, direction, otherDidMove);
     if (inUsername == username) {
       return;
     }
+
+    console.log("updatedPosition", inUsername, x, y, direction, otherDidMove);
 
     if (
       !otherPlayers[inUsername] ||
@@ -331,8 +332,8 @@ connection.on("collisionCheck", () => {
   console.log("collisionCheck from server");
 });
 
-connection.on("playerDisconected", (inUsername: string) => {
-  console.log("playerDisconected", inUsername, username);
+connection.on("playerDisconnected", (inUsername: string) => {
+  console.log("playerDisconnected", inUsername, username);
   if (inUsername == username.toString()) return;
 
   delete otherPlayers[inUsername];
