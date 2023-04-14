@@ -4,10 +4,9 @@ using System.Timers;
 
 namespace GameBackend.Services
 {
-    public class CollisionService : IHostedService, IAsyncDisposable
+    public class CollisionService : IHostedService
     {
         private readonly IHubContext<ChatHub> _hub;
-        private System.Timers.Timer? _timer;
         private readonly ILogger<CollisionService> _logger;
 
         private bool _shutDown = false;
@@ -39,16 +38,6 @@ namespace GameBackend.Services
                 _hub.Clients.All.SendAsync("collisionCheck");
                 Task.Delay(1000).Wait();
             }
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            if (_timer is IAsyncDisposable timer)
-            {
-                await timer.DisposeAsync();
-            }
-
-            _timer = null;
         }
     }
 }

@@ -19,7 +19,7 @@ const obstacleHere = (row: number, col: number) => {
 const connection = new signalR.HubConnectionBuilder()
   .withUrl("/api/chat-hub")
   .build();
-const username = new Date().getTime();
+let username = "";
 let connected = false;
 let didSendStoppedMoving = false;
 
@@ -231,7 +231,7 @@ if (!canvas) {
 
       if (!didMove && !didSendStoppedMoving) {
         didSendStoppedMoving = true;
-        connection.send("playerStoppedMoving", username);
+        connection.send("playerStoppedMoving");
         return;
       }
 
@@ -241,7 +241,6 @@ if (!canvas) {
 
       connection.send(
         "updatedPosition",
-        username,
         camera.x + getCurrentSprite().x,
         camera.y + getCurrentSprite().y,
         currentPlayerSprite,
@@ -289,7 +288,8 @@ connection.on(
     direction: Direction,
     otherDidMove: boolean
   ) => {
-    if (inUsername == username.toString()) {
+    console.log("updatedPosition", inUsername, x, y, direction, otherDidMove);
+    if (inUsername == username) {
       return;
     }
 
@@ -329,6 +329,20 @@ connection.on("playerStoppedMoving", (inUsername: string) => {
 
 connection.on("collisionCheck", () => {
   console.log("collisionCheck from server");
+});
+
+connection.on("playerDisconected", (inUsername: string) => {
+  console.log("playerDisconected", inUsername, username);
+  if (inUsername == username.toString()) return;
+
+  delete otherPlayers[inUsername];
+  delete otherPlayersDirection[inUsername];
+  delete otherPlayerDidMove[inUsername];
+});
+
+connection.on("recieveConnectionId", (newUsername: string) => {
+  username = newUsername;
+  console.log("Username:", username);
 });
 
 connection

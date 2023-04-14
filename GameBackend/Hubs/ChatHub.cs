@@ -14,20 +14,26 @@ public class ChatHub : Hub
 
     public async Task NewMessage(long username, string message) => await Clients.All.SendAsync("messageReceived", username, message);
 
-    public async Task UpdatedPosition(long username, int x, int y, string direction, bool didMove) => await Clients.All.SendAsync("updatedPosition", username, x, y, direction, didMove);
+    public async Task UpdatedPosition(int x, int y, string direction, bool didMove) => 
+        await Clients.All.SendAsync("updatedPosition", Context.ConnectionId, x, y, direction, didMove);
 
-    public async Task PlayerStoppedMoving(long username) => await Clients.All.SendAsync("playerStoppedMoving", username);
+    public async Task PlayerStoppedMoving() => 
+        await Clients.All.SendAsync("playerStoppedMoving", Context.ConnectionId);
 
     public override Task OnConnectedAsync()
     {
         _logger.LogInformation("Client connected: {Id}", Context.ConnectionId);
+
+        Clients.Client(Context.ConnectionId).SendAsync("recieveConnectionId", Context.ConnectionId);
+
         return base.OnConnectedAsync();
     }
 
-    public override Task OnDisconnectedAsync(Exception? exception)
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {
         _logger.LogInformation("Client disconnected: {Id}", Context.ConnectionId);
-        return base.OnDisconnectedAsync(exception);
+
+        await Clients.All.SendAsync("playerDisconnected", Context.ConnectionId);
     }
 
     public void CheckForCollisions()
