@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using GameBackend.Services;
+using Microsoft.AspNetCore.SignalR;
 using System.Timers;
 
 namespace GameBackend.Hubs;
@@ -6,18 +7,26 @@ namespace GameBackend.Hubs;
 public class ChatHub : Hub
 {
     private readonly ILogger<ChatHub> _logger;
+    private readonly BackgroundCollisionJobs _backgroundCollisionJobs;
 
-    public ChatHub(ILogger<ChatHub> logger)
+    public ChatHub(ILogger<ChatHub> logger, BackgroundCollisionJobs backgroundCollisionJobs)
     {
         _logger = logger;
+        _backgroundCollisionJobs = backgroundCollisionJobs;
     }
 
     public async Task NewMessage(long username, string message) => await Clients.All.SendAsync("messageReceived", username, message);
 
-    public async Task UpdatedPosition(int x, int y, string direction, bool didMove) => 
-        await Clients.All.SendAsync("updatedPosition", Context.ConnectionId, x, y, direction, didMove);
+    public void UpdatedPosition(int x, int y, string direction, bool didMove) => _backgroundCollisionJobs.CollisionJobs.Enqueue(new CollisionJob
+    {
+        ConnectionId = Context.ConnectionId,
+        X = x,
+        Y = y,
+        Direction = direction,
+        DidMove = didMove
+    });
 
-    public async Task PlayerStoppedMoving() => 
+    public async Task PlayerStoppedMoving() =>
         await Clients.All.SendAsync("playerStoppedMoving", Context.ConnectionId);
 
     public override Task OnConnectedAsync()

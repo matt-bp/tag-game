@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSignalR();
 builder.Services.AddHostedService<CollisionService>();
+builder.Services.AddSingleton<BackgroundCollisionJobs>();
 
 var app = builder.Build();
 
