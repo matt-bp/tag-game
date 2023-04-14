@@ -2,7 +2,6 @@
 using GameBackend.Models;
 using Microsoft.AspNetCore.SignalR;
 using System.Diagnostics;
-using System.Timers;
 
 namespace GameBackend.Services
 {
@@ -23,6 +22,8 @@ namespace GameBackend.Services
             _backgroundCollisionJobs = backgroundCollisionJobs;
         }
 
+        #region Hosted Service Methods
+
         public Task StartAsync(CancellationToken cancellationToken)
         {
             Task.Run(GameLoop, cancellationToken);
@@ -36,6 +37,8 @@ namespace GameBackend.Services
 
             return Task.CompletedTask;
         }
+
+        #endregion
 
         /// <summary>
         /// Server side game loop update function.
@@ -54,7 +57,7 @@ namespace GameBackend.Services
             }
         }
 
-        #region Input
+        #region Input from clients
 
         private void HandleInput()
         {
@@ -114,6 +117,8 @@ namespace GameBackend.Services
             // No-op
         }
 
+        #region Output to clients
+
         private async Task SendGameStateToClients()
         {
             foreach (var id in _disconnectedPlayers)
@@ -139,5 +144,7 @@ namespace GameBackend.Services
         private async Task BroadcastPlayerInformation(string id, Player player) => await _hub.Clients.All.SendAsync("updatedPlayer", id, player.X, player.Y, player.Direction, player.DidMove);
 
         private async Task BroadcastDisconnectedPlayer(string id) => await _hub.Clients.All.SendAsync("playerDisconnected", id);
+
+        #endregion
     }
 }
