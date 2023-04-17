@@ -1,4 +1,4 @@
-﻿using GameBackend.Hubs;
+using GameBackend.Hubs;
 using GameBackend.Models;
 using Microsoft.AspNetCore.SignalR;
 using System.Diagnostics;
@@ -139,11 +139,12 @@ namespace GameBackend.Services
                 await BroadcastPlayerInformation(id, player);
         }
 
-        private async Task SendPlayerTheirId(string id) => await _hub.Clients.Client(id).SendAsync("recieveConnectionId", id);
+        [Obsolete("Client will already have this connection")]
+        private async Task SendPlayerTheirId(string id) => await _hub.Clients.Client(id).SendAsync("OnConnected", id);
 
-        private async Task BroadcastPlayerInformation(string id, Player player) => await _hub.Clients.All.SendAsync("updatedPlayer", id, player.X, player.Y, player.Direction, player.DidMove);
+        private async Task BroadcastPlayerInformation(string id, Player player) => await _hub.Clients.All.SendAsync("PlayerMoved", id, player.X, player.Y, player.Direction, player.DidMove);
 
-        private async Task BroadcastDisconnectedPlayer(string id) => await _hub.Clients.All.SendAsync("playerDisconnected", id);
+        private async Task BroadcastDisconnectedPlayer(string id) => await _hub.Clients.All.SendAsync("PlayerLeft", id);
 
         #endregion
     }

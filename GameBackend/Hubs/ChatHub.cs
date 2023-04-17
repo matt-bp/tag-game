@@ -1,4 +1,4 @@
-﻿using GameBackend.Models;
+using GameBackend.Models;
 using GameBackend.Services;
 using Microsoft.AspNetCore.SignalR;
 using System.Timers;
@@ -16,9 +16,9 @@ public class ChatHub : Hub
         _backgroundJobs = backgroundCollisionJobs;
     }
 
-    public async Task NewMessage(long username, string message) => await Clients.All.SendAsync("messageReceived", username, message);
+    public async Task NewMessage(long username, string message) => await Clients.All.SendAsync("MessageReceived", username, message);
 
-    public void UpdatedPosition(int x, int y, string direction) => _backgroundJobs.Positions.Enqueue(new PositionJob
+    public void Move(int x, int y, string direction) => _backgroundJobs.Positions.Enqueue(new PositionJob
     {
         ConnectionId = Context.ConnectionId,
         X = x,
@@ -26,7 +26,7 @@ public class ChatHub : Hub
         Direction = direction
     });
 
-    public void PlayerStoppedMoving() => _backgroundJobs.PlayersThatStoppedMoving.Enqueue(new IdJob { ConnectionId = Context.ConnectionId });
+    public void Stop() => _backgroundJobs.PlayersThatStoppedMoving.Enqueue(new IdJob { ConnectionId = Context.ConnectionId });
 
     public override Task OnConnectedAsync()
     {
