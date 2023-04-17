@@ -1,4 +1,4 @@
-﻿namespace GameBackend.Models
+namespace GameBackend.Models
 {
     public class Player
     {
@@ -6,6 +6,5 @@
         public int Y { get; set; }
         public string Direction { get; set; }
         public bool DidMove { get; set; }
-        public bool IsNew { get; set; }
     }
 }

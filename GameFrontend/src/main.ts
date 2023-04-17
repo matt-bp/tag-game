@@ -338,15 +338,13 @@ connection.on("PlayerLeft", (inUsername: string) => {
     delete otherPlayerDidMove[inUsername];
 });
 
-connection.on("OnConnected", (newUsername: string) => {
-    username = newUsername;
-    console.log("My username:", username);
-});
-
 connection
     .start()
     .then(() => {
         connected = true;
+        const tempConnection = connection.getConnectionId();
+        if (tempConnection == null) throw "No connection id";
+        username = tempConnection;
     })
     .catch((err) => document.write(err));
 

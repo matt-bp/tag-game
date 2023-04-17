@@ -106,7 +106,6 @@ namespace GameBackend.Services
                 Y = 988,
                 Direction = "down",
                 DidMove = false,
-                IsNew = true,
             });
         }
 
@@ -127,20 +126,8 @@ namespace GameBackend.Services
             _disconnectedPlayers = new();
 
             foreach (var (id, player) in _players)
-            {
-                if (player.IsNew)
-                {
-                    player.IsNew = false;
-                    await SendPlayerTheirId(id);
-                }
-            }
-
-            foreach (var (id, player) in _players)
                 await BroadcastPlayerInformation(id, player);
         }
-
-        [Obsolete("Client will already have this connection")]
-        private async Task SendPlayerTheirId(string id) => await _hub.Clients.Client(id).SendAsync("OnConnected", id);
 
         private async Task BroadcastPlayerInformation(string id, Player player) => await _hub.Clients.All.SendAsync("PlayerMoved", id, player.X, player.Y, player.Direction, player.DidMove);
 

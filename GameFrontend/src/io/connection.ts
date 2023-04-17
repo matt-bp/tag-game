@@ -72,4 +72,8 @@ export default class Connection {
         // this.#handlers[type] = handler;
         this.connection.on(type, handler);
     };
+
+    public getConnectionId = () => {
+        return this.connection.connectionId;
+    };
 }
