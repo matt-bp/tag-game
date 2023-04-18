@@ -1,10 +1,12 @@
 import "./style.css";
 import { Camera } from "./camera";
-import { Sprite } from "./sprite";
+import { Sprite } from "./graphics/sprite";
 import collisions from "../data/collisions.json";
 import { Boundary } from "./Boundary";
 import { rectangularCollision } from "./collisions";
 import Connection from "./io/connection";
+import PlayScreen from "./scenes/PlayScene";
+import { IScene } from "./scenes/IScene";
 
 const indexIntoCollisions = (row: number, col: number) => {
     const index = col * collisions.width + row;
@@ -84,6 +86,10 @@ if (!canvas) {
     if (!ctx) {
         console.error("Context not initialized");
     } else {
+        const scene: IScene = new PlayScreen(canvas.width, canvas.height);
+
+        scene.startup();
+
         const camera = new Camera(390, 700);
         // const camera = new Camera(0, 0);
 
@@ -112,24 +118,24 @@ if (!canvas) {
             }
         }
 
-        const drawImages = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // const drawImages = () => {
+        //     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            gameMap.draw(ctx, camera);
+        //     gameMap.draw(ctx, camera);
 
-            getCurrentSprite().draw(ctx, camera);
+        //     getCurrentSprite().draw(ctx, camera);
 
-            var keys = Object.keys(otherPlayers);
-            for (let i = 0; i < keys.length; i++) {
-                otherPlayers[keys[i]].draw(ctx, camera);
-            }
+        //     var keys = Object.keys(otherPlayers);
+        //     for (let i = 0; i < keys.length; i++) {
+        //         otherPlayers[keys[i]].draw(ctx, camera);
+        //     }
 
-            gameMapForeground.draw(ctx, camera);
+        //     gameMapForeground.draw(ctx, camera);
 
-            // for (let boundary of boundaries) {
-            //   boundary.draw(ctx, camera);
-            // }
-        };
+        //     // for (let boundary of boundaries) {
+        //     //   boundary.draw(ctx, camera);
+        //     // }
+        // };
 
         const keyPressed: Record<string, boolean> = {};
         let didMove = false;
@@ -256,7 +262,7 @@ if (!canvas) {
 
             updateAnimations();
 
-            drawImages();
+            scene.render(ctx);
 
             requestAnimationFrame(animate);
         };
