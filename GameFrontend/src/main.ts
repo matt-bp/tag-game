@@ -1,21 +1,10 @@
 import "./style.css";
 import { Camera } from "./camera";
 import { Sprite } from "./graphics/sprite";
-import collisions from "../data/collisions.json";
-import { Boundary } from "./Boundary";
 import { rectangularCollision } from "./collisions";
 import Connection from "./io/connection";
 import PlayScreen from "./scenes/PlayScene";
 import { IScene } from "./scenes/IScene";
-
-const indexIntoCollisions = (row: number, col: number) => {
-    const index = col * collisions.width + row;
-    return collisions.data[index];
-};
-
-const obstacleHere = (row: number, col: number) => {
-    return indexIntoCollisions(row, col) != 0;
-};
 
 const connection = new Connection("/api/chat-hub");
 
@@ -95,48 +84,6 @@ if (!canvas) {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const gameMap = new Sprite({ url: "/assets/GameMap.png", x: 0, y: 0 });
-
-        const gameMapForeground = new Sprite({
-            url: "/assets/GameMap_Foreground.png",
-            x: 0,
-            y: 0,
-        });
-
-        const boundaries: Boundary[] = [];
-
-        for (let row = 0; row < collisions.width; row++) {
-            for (let col = 0; col < collisions.height; col++) {
-                if (obstacleHere(row, col)) {
-                    boundaries.push(
-                        new Boundary({
-                            x: row * Boundary.size,
-                            y: col * Boundary.size,
-                        })
-                    );
-                }
-            }
-        }
-
-        // const drawImages = () => {
-        //     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        //     gameMap.draw(ctx, camera);
-
-        //     getCurrentSprite().draw(ctx, camera);
-
-        //     var keys = Object.keys(otherPlayers);
-        //     for (let i = 0; i < keys.length; i++) {
-        //         otherPlayers[keys[i]].draw(ctx, camera);
-        //     }
-
-        //     gameMapForeground.draw(ctx, camera);
-
-        //     // for (let boundary of boundaries) {
-        //     //   boundary.draw(ctx, camera);
-        //     // }
-        // };
-
         const keyPressed: Record<string, boolean> = {};
         let didMove = false;
 
@@ -193,28 +140,28 @@ if (!canvas) {
             }
         };
 
-        const detectCollisions = () => {
-            const playerRectangle = {
-                x: camera.x + getCurrentSprite().x,
-                y: camera.y + getCurrentSprite().y,
-                width: getCurrentSprite().getWidth(),
-                height: getCurrentSprite().getHeight(),
-            };
+        // const detectCollisions = () => {
+        //     const playerRectangle = {
+        //         x: camera.x + getCurrentSprite().x,
+        //         y: camera.y + getCurrentSprite().y,
+        //         width: getCurrentSprite().getWidth(),
+        //         height: getCurrentSprite().getHeight(),
+        //     };
 
-            for (let i = 0; i < boundaries.length; i++) {
-                const boundaryRectangle = {
-                    x: boundaries[i].getX(),
-                    y: boundaries[i].getY(),
-                    width: Boundary.size,
-                    height: Boundary.size,
-                };
+        //     for (let i = 0; i < boundaries.length; i++) {
+        //         const boundaryRectangle = {
+        //             x: boundaries[i].getX(),
+        //             y: boundaries[i].getY(),
+        //             width: Boundary.size,
+        //             height: Boundary.size,
+        //         };
 
-                if (rectangularCollision(playerRectangle, boundaryRectangle)) {
-                    handleCollision();
-                    break;
-                }
-            }
-        };
+        //         if (rectangularCollision(playerRectangle, boundaryRectangle)) {
+        //             handleCollision();
+        //             break;
+        //         }
+        //     }
+        // };
 
         const updateAnimations = () => {
             var keys = Object.keys(otherPlayers);
@@ -258,7 +205,7 @@ if (!canvas) {
 
             sendSocketInfo();
 
-            detectCollisions();
+            // detectCollisions();
 
             updateAnimations();
 

@@ -118,5 +118,9 @@ export default class PlayScene implements IScene {
         // }
 
         this.#worldSprites["map_foreground"].draw(ctx, this.#camera);
+
+        for (let boundary of this.#boundaries) {
+            boundary.draw(ctx, this.#camera);
+        }
     };
 }
