@@ -6,6 +6,7 @@ import { Camera } from "../camera";
 import Keyboard from "../io/keyboard";
 import { rectangularCollision } from "../collisions";
 import Connection from "../io/connection";
+import { Direction } from "../helpers/direction";
 
 const indexIntoCollisions = (row: number, col: number) => {
     const index = col * collisions.width + row;
@@ -16,7 +17,6 @@ const obstacleHere = (row: number, col: number) => {
     return indexIntoCollisions(row, col) != 0;
 };
 
-type Direction = "down" | "right" | "up" | "left";
 type MultiSprite = Record<Direction, Sprite>;
 
 const createMultiSprite = (x: number, y: number) => {
@@ -106,7 +106,11 @@ export default class PlayScene implements IScene {
 
         this.#keyboard = new Keyboard();
 
-        this.#connection.start();
+        throw new Error("Start here");
+        this.#connection.start().then(() => {
+            this.#connection.addListener("PlayerMoved", this.handlePlayerMoved);
+            this.#connection.addListener("PlayerLeft", this.handlePlayerLeft);
+        });
 
         const send = () => {
             const inputElement = document.querySelector(
@@ -203,27 +207,32 @@ export default class PlayScene implements IScene {
     };
 
     private processNetworkInput = () => {
-        for (let message of this.#connection.messageQueue) {
-            if (message[0] == "PlayerMoved") {
-                this.handlePlayerMoved(
-                    message[1][0],
-                    message[1][1],
-                    message[1][2],
-                    message[1][3],
-                    message[1][4]
-                );
-                continue;
-            }
-
-            if (message[0] == "PlayerLeft") {
-                this.handlePlayerLeft(message[1][0]);
-                continue;
-            }
-
-            throw new Error(`Unknown message type: ${message[0]}`);
+        var keys = Object.keys(this.#connection.playerMoveQueue);
+        for (let i = 0; i < keys.length; i++) {
+            const key = this.#connection.playerMoveQueue[keys[i]];
+            this.handlePlayerMoved(...key);
         }
 
-        this.#connection.messageQueue = [];
+        this.#connection.playerMoveQueue = {};
+
+        // for (let message of this.#connection.messageQueue) {
+        //     if (message[0] == "PlayerMoved") {
+        //         this.handlePlayerMoved(
+        //             message[1][0],
+        //             message[1][1],
+        //             message[1][2],
+        //             message[1][3],
+        //             message[1][4]
+        //         );
+        //         continue;
+        //     }
+        //     if (message[0] == "PlayerLeft") {
+        //         this.handlePlayerLeft(message[1][0]);
+        //         continue;
+        //     }
+        //     throw new Error(`Unknown message type: ${message[0]}`);
+        // }
+        // this.#connection.messageQueue = [];
     };
 
     private updateAnimations = () => {
