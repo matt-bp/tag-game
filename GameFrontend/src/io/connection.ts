@@ -8,49 +8,25 @@ type ServerIncomingMessages =
     | "OnConnected"
     | "MessageReceived";
 
-type Handler = (...args: any[]) => void;
-
 export default class Connection {
     private readonly connection: signalR.HubConnection;
-    public username: string = "";
     public connected: boolean = false;
     public messageQueue: [ServerIncomingMessages, any[]][] = [];
-    #handlers: Record<ServerIncomingMessages, Handler | undefined> = {
-        MessageReceived: undefined,
-        OnConnected: undefined,
-        PlayerJoined: undefined,
-        PlayerLeft: undefined,
-        PlayerMoved: undefined,
-    };
 
     constructor(hubRoute: string) {
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(hubRoute)
             .build();
 
-        this.#initConnectionHandlers();
+        this.#initQueueSources();
     }
 
-    #initConnectionHandlers = () => {
-        this.connection.on("MessageReceived", (...args) => {
-            this.messageQueue.push(["MessageReceived", args]);
-        });
-
-        this.connection.on("OnConnected", (...args) => {
-            this.messageQueue.push(["OnConnected", args]);
-        });
-
-        this.connection.on("PlayerJoined", (...args) => {
-            this.messageQueue.push(["PlayerJoined", args]);
-        });
-
-        this.connection.on("PlayerLeft", (...args) => {
-            this.messageQueue.push(["PlayerLeft", args]);
-        });
-
-        this.connection.on("PlayerMoved", (...args) => {
-            this.messageQueue.push(["PlayerMoved", args]);
-        });
+    #initQueueSources = () => {
+        this.addIncomingToQueue("MessageReceived");
+        this.addIncomingToQueue("OnConnected");
+        this.addIncomingToQueue("PlayerJoined");
+        this.addIncomingToQueue("PlayerLeft");
+        this.addIncomingToQueue("PlayerMoved");
     };
 
     public start: () => Promise<void> = async () => {
@@ -58,22 +34,20 @@ export default class Connection {
         this.connected = true;
     };
 
-    public send: <T extends ServerOutgoingMessages>(
-        type: T,
+    public send: (
+        type: ServerOutgoingMessages,
         ...args: any[]
     ) => Promise<void> = async (type, ...args) => {
         await this.connection.send(type, ...args);
     };
 
-    public on: <T extends ServerIncomingMessages>(
-        type: T,
-        handler: Handler
-    ) => void = (type, handler) => {
-        // this.#handlers[type] = handler;
-        this.connection.on(type, handler);
-    };
-
     public getConnectionId = () => {
         return this.connection.connectionId;
     };
+
+    private addIncomingToQueue(methodName: ServerIncomingMessages) {
+        this.connection.on(methodName, (...args) => {
+            this.messageQueue.push([methodName, args]);
+        });
+    }
 }

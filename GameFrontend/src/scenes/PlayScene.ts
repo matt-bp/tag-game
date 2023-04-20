@@ -139,6 +139,10 @@ export default class PlayScene implements IScene {
     };
 
     private processInput = () => {
+        this.processKeyboardInput();
+    };
+
+    private processKeyboardInput = () => {
         let direction = { x: 0, y: 0 };
 
         this.#didPlayerMove = false;
