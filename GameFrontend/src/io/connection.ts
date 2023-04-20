@@ -1,12 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 
 type ServerOutgoingMessages = "Move" | "Stop" | "NewMessage";
-type ServerIncomingMessages =
-    | "PlayerJoined"
-    | "PlayerLeft"
-    | "PlayerMoved"
-    | "OnConnected"
-    | "MessageReceived";
+type ServerIncomingMessages = "PlayerLeft" | "PlayerMoved" | "MessageReceived";
 
 export default class Connection {
     private readonly connection: signalR.HubConnection;
@@ -22,16 +17,17 @@ export default class Connection {
     }
 
     #initQueueSources = () => {
-        this.addIncomingToQueue("MessageReceived");
-        this.addIncomingToQueue("OnConnected");
-        this.addIncomingToQueue("PlayerJoined");
         this.addIncomingToQueue("PlayerLeft");
         this.addIncomingToQueue("PlayerMoved");
     };
 
     public start: () => Promise<void> = async () => {
-        await this.connection.start();
-        this.connected = true;
+        try {
+            await this.connection.start();
+            this.connected = true;
+        } catch (err: any) {
+            document.write(err);
+        }
     };
 
     public send: (
@@ -47,6 +43,8 @@ export default class Connection {
 
     private addIncomingToQueue(methodName: ServerIncomingMessages) {
         this.connection.on(methodName, (...args) => {
+            if (args[0] == this.getConnectionId()) return; // If we're getting a message about ourselves, ignore it
+
             this.messageQueue.push([methodName, args]);
         });
     }

@@ -12,7 +12,7 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-app.MapHub<ChatHub>("/chat-hub");
+app.MapHub<GameHub>("/game-hub");
 
 app.MapGet("/", () => "Hello World!");
 

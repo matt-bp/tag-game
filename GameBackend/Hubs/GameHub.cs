@@ -5,18 +5,16 @@ using System.Timers;
 
 namespace GameBackend.Hubs;
 
-public class ChatHub : Hub
+public class GameHub : Hub
 {
-    private readonly ILogger<ChatHub> _logger;
+    private readonly ILogger<GameHub> _logger;
     private readonly BackgroundJobs _backgroundJobs;
 
-    public ChatHub(ILogger<ChatHub> logger, BackgroundJobs backgroundCollisionJobs)
+    public GameHub(ILogger<GameHub> logger, BackgroundJobs backgroundCollisionJobs)
     {
         _logger = logger;
         _backgroundJobs = backgroundCollisionJobs;
     }
-
-    public async Task NewMessage(long username, string message) => await Clients.All.SendAsync("MessageReceived", username, message);
 
     public void Move(int x, int y, string direction) => _backgroundJobs.Positions.Enqueue(new PositionJob
     {

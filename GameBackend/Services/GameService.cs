@@ -7,7 +7,7 @@ namespace GameBackend.Services
 {
     public class GameService : IHostedService
     {
-        private readonly IHubContext<ChatHub> _hub;
+        private readonly IHubContext<GameHub> _hub;
         private readonly ILogger<GameService> _logger;
         private readonly BackgroundJobs _backgroundCollisionJobs;
         private Dictionary<string, Player> _players = new();
@@ -15,7 +15,7 @@ namespace GameBackend.Services
 
         private bool _shutDown = false;
 
-        public GameService(ILogger<GameService> logger, IHubContext<ChatHub> hub, BackgroundJobs backgroundCollisionJobs)
+        public GameService(ILogger<GameService> logger, IHubContext<GameHub> hub, BackgroundJobs backgroundCollisionJobs)
         {
             _logger = logger;
             _hub = hub;
