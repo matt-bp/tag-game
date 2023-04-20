@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 
 type ServerOutgoingMessages = "Move" | "Stop" | "NewMessage";
-type ServerIncomingMessages = "PlayerLeft" | "PlayerMoved" | "MessageReceived";
+type ServerIncomingMessages = "PlayerLeft" | "PlayerMoved" | "IncomingMessage";
 
 export default class Connection {
     private readonly connection: signalR.HubConnection;

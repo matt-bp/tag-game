@@ -31,15 +31,3 @@ if (!canvas) {
         animate();
     }
 }
-
-// const send = () => {
-//     const inputElement = document.querySelector("#message") as HTMLInputElement;
-//     const value = inputElement.value;
-//     connection
-//         .send("NewMessage", username, value)
-//         .then(() => (inputElement.value = ""));
-// };
-
-// document.querySelector("#sendButton")?.addEventListener("click", () => {
-//     send();
-// });

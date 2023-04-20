@@ -65,7 +65,7 @@ export default class PlayScene implements IScene {
     #didPlayerMove: boolean = false;
     #playerSpeed: number = 3;
     #connection: Connection = new Connection("/api/game-hub");
-    #didSendStoppedMoving: boolean = false;
+    #didSendStoppedMoving: boolean = true;
 
     constructor(
         private readonly width: number,
@@ -107,6 +107,21 @@ export default class PlayScene implements IScene {
         this.#keyboard = new Keyboard();
 
         this.#connection.start();
+
+        const send = () => {
+            const inputElement = document.querySelector(
+                "#message"
+            ) as HTMLInputElement;
+            const value = inputElement.value;
+            console.log("Sending message: " + value + "");
+            this.#connection
+                .send("NewMessage", value)
+                .then(() => (inputElement.value = ""));
+        };
+
+        document.querySelector("#sendButton")?.addEventListener("click", () => {
+            send();
+        });
     };
 
     end = () => {
@@ -197,12 +212,12 @@ export default class PlayScene implements IScene {
                     message[1][3],
                     message[1][4]
                 );
-                return;
+                continue;
             }
 
             if (message[0] == "PlayerLeft") {
-                // this.handlePlayerLeft(message[1][0]);
-                return;
+                this.handlePlayerLeft(message[1][0]);
+                continue;
             }
 
             throw new Error(`Unknown message type: ${message[0]}`);
@@ -287,6 +302,7 @@ export default class PlayScene implements IScene {
             !this.#otherPlayers[otherId] ||
             direction != this.#otherPlayersDirection[otherId]
         ) {
+            console.log("Creating new!");
             const mapDirectionToSpriteName = {
                 up: "playerUp",
                 down: "playerDown",

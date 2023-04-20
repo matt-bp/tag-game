@@ -29,7 +29,6 @@ export class Sprite {
             this._isLoaded = true;
             this._width = this._image.width / this._frames;
             this._height = this._image.height;
-            console.log(this._width, this._height);
         };
 
         this.x = props.x;
