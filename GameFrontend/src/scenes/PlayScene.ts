@@ -106,7 +106,7 @@ export default class PlayScene implements IScene {
 
         this.#keyboard = new Keyboard();
 
-        throw new Error("Start here");
+        // throw new Error("Start here");
         this.#connection.start().then(() => {
             this.#connection.addListener("PlayerMoved", this.handlePlayerMoved);
             this.#connection.addListener("PlayerLeft", this.handlePlayerLeft);
@@ -337,12 +337,6 @@ export default class PlayScene implements IScene {
 
     private sendPositionToServer = () => {
         if (!this.#didPlayerMove) return;
-
-        this.#connection.send("Move", [
-            this.#camera?.x,
-            this.#camera?.y,
-            this.#playerDirection,
-        ]);
 
         if (!this.#connection.connected) return;
 

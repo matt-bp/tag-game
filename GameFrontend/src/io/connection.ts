@@ -73,10 +73,11 @@ export default class Connection {
         methodName: T,
         callback: (...args: ArgsToIncomingMessages[T]) => void
     ) {
-        this.connection.on(methodName, (args) => {
+        this.connection.on(methodName, (...args) => {
             if (args[0] == this.getConnectionId()) return; // If we're getting a message about ourselves, ignore it
 
-            callback(...args);
+            console.log(...args);
+            callback(...(args as ArgsToIncomingMessages[T]));
         });
     }
 }
