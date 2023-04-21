@@ -5,7 +5,7 @@ import collisions from "../../data/collisions.json";
 import { Camera } from "../camera";
 import Keyboard from "../io/keyboard";
 import { rectangularCollision } from "../collisions";
-import Connection from "../io/connection";
+import Connection, { ArgsToIncomingMessages } from "../io/connection";
 import { Direction } from "../helpers/direction";
 
 const indexIntoCollisions = (row: number, col: number) => {
@@ -106,26 +106,7 @@ export default class PlayScene implements IScene {
 
         this.#keyboard = new Keyboard();
 
-        // throw new Error("Start here");
-        this.#connection.start().then(() => {
-            this.#connection.addListener("PlayerMoved", this.handlePlayerMoved);
-            this.#connection.addListener("PlayerLeft", this.handlePlayerLeft);
-        });
-
-        const send = () => {
-            const inputElement = document.querySelector(
-                "#message"
-            ) as HTMLInputElement;
-            const value = inputElement.value;
-            console.log("Sending message: " + value + "");
-            this.#connection
-                .send("NewMessage", value)
-                .then(() => (inputElement.value = ""));
-        };
-
-        document.querySelector("#sendButton")?.addEventListener("click", () => {
-            send();
-        });
+        this.#connection.start();
     };
 
     end = () => {
@@ -207,32 +188,22 @@ export default class PlayScene implements IScene {
     };
 
     private processNetworkInput = () => {
-        var keys = Object.keys(this.#connection.playerMoveQueue);
-        for (let i = 0; i < keys.length; i++) {
-            const key = this.#connection.playerMoveQueue[keys[i]];
-            this.handlePlayerMoved(...key);
+        for (let message of this.#connection.messageQueue) {
+            if (message[0] == "PlayerMoved") {
+                this.handlePlayerMoved(
+                    ...(message[1] as ArgsToIncomingMessages["PlayerMoved"])
+                );
+                continue;
+            }
+            if (message[0] == "PlayerLeft") {
+                this.handlePlayerLeft(
+                    ...(message[1] as ArgsToIncomingMessages["PlayerLeft"])
+                );
+                continue;
+            }
+            throw new Error(`Unknown message type: ${message[0]}`);
         }
-
-        this.#connection.playerMoveQueue = {};
-
-        // for (let message of this.#connection.messageQueue) {
-        //     if (message[0] == "PlayerMoved") {
-        //         this.handlePlayerMoved(
-        //             message[1][0],
-        //             message[1][1],
-        //             message[1][2],
-        //             message[1][3],
-        //             message[1][4]
-        //         );
-        //         continue;
-        //     }
-        //     if (message[0] == "PlayerLeft") {
-        //         this.handlePlayerLeft(message[1][0]);
-        //         continue;
-        //     }
-        //     throw new Error(`Unknown message type: ${message[0]}`);
-        // }
-        // this.#connection.messageQueue = [];
+        this.#connection.messageQueue = [];
     };
 
     private updateAnimations = () => {
@@ -311,8 +282,6 @@ export default class PlayScene implements IScene {
         direction: Direction,
         otherDidMove: boolean
     ) => {
-        console.log("player moved", otherId, x, y, direction, otherDidMove);
-
         if (
             !this.#otherPlayers[otherId] ||
             direction != this.#otherPlayersDirection[otherId]
