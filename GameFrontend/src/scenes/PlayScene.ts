@@ -65,7 +65,7 @@ export default class PlayScene implements IScene {
     #didPlayerMove: boolean = false;
     #playerSpeed: number = 3;
     #connection: Connection = new Connection("/api/game-hub");
-    #didSendStoppedMoving: boolean = true;
+    #didSendStoppedMoving: boolean = false;
 
     constructor(
         private readonly width: number,
@@ -239,6 +239,12 @@ export default class PlayScene implements IScene {
         if (this.#didPlayerMove) {
             this.getCurrentSprite()?.updateAnimation();
         }
+
+        var keys = Object.keys(this.#otherPlayers);
+        for (let i = 0; i < keys.length; i++) {
+            if (this.#otherPlayerDidMove[keys[i]])
+                this.#otherPlayers[keys[i]].updateAnimation();
+        }
     };
 
     private detectCollisions = () => {
@@ -336,8 +342,6 @@ export default class PlayScene implements IScene {
     };
 
     private sendPositionToServer = () => {
-        if (!this.#didPlayerMove) return;
-
         if (!this.#connection.connected) return;
 
         if (!this.#didPlayerMove && !this.#didSendStoppedMoving) {
