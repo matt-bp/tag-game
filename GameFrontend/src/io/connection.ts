@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 import { Direction } from "../helpers/direction";
 
-type ServerOutgoingMessages = "Move" | "Stop" | "NewMessage";
+type ServerOutgoingMessages = "Move" | "Stop";
 type ServerIncomingMessages = "PlayerLeft" | "PlayerMoved";
 
 export type ArgsToIncomingMessages = {

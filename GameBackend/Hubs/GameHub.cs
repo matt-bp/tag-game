@@ -16,8 +16,6 @@ public class GameHub : Hub
         _backgroundJobs = backgroundCollisionJobs;
     }
 
-    public async Task NewMessage(string message) => await Clients.All.SendAsync("IncomingMessage", Context.ConnectionId, message);
-
     public void Move(int x, int y, string direction) => _backgroundJobs.Positions.Enqueue(new PositionJob
     {
         ConnectionId = Context.ConnectionId,
