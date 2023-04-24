@@ -2,6 +2,7 @@ using GameBackend.Hubs;
 using GameBackend.Models;
 using Microsoft.AspNetCore.SignalR;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace GameBackend.Services
 {
@@ -12,6 +13,8 @@ namespace GameBackend.Services
         private readonly BackgroundJobs _backgroundCollisionJobs;
         private Dictionary<string, Player> _players = new();
         private List<string> _disconnectedPlayers = new();
+        private double _elapsedTime = 0;
+        private double _timeAtLastTag = 0;
 
         private bool _shutDown = false;
 
@@ -45,8 +48,15 @@ namespace GameBackend.Services
         /// </summary>
         public async void GameLoop()
         {
+            var startTime = DateTime.Now;
+
             while (!_shutDown)
             {
+                DateTime endTime = DateTime.Now;
+                var timeBetweenFrames = (endTime - startTime).TotalMilliseconds;
+                startTime = endTime;
+                _elapsedTime += timeBetweenFrames;
+
                 HandleInput();
 
                 UpdateGameState();
@@ -111,10 +121,60 @@ namespace GameBackend.Services
 
         #endregion
 
+        #region Update Game State
+
         private void UpdateGameState()
         {
-            // No-op
+            SetPlayerAsIt();
+
+            CheckForPlayerCollisions();
         }
+
+        private void SetPlayerAsIt()
+        {
+            if (_players.Any(p => p.Value.IsChaser))
+                return;
+
+            if (_players.Count == 0)
+                return;
+
+            var randomPlayer = _players.ElementAt(new Random().Next(0, _players.Count));
+            randomPlayer.Value.IsChaser = true;
+        }
+
+        private void CheckForPlayerCollisions()
+        {
+            if (_elapsedTime - _timeAtLastTag < 10000) // It hasn't been long enough since the last tag
+                return;
+
+            if (!_players.Any(p => p.Value.IsChaser)) // No one has joined yet, or is playing.
+                return;
+
+            var chaser = _players.First(p => p.Value.IsChaser);
+
+            foreach (var (id, player) in _players)
+            {
+                if (id == chaser.Key) // Don't tag ourselves
+                    continue;
+
+                var chaserCenterPos = new Vector2(chaser.Value.X + Player.WIDTH / 2, chaser.Value.Y + Player.HEIGHT / 2);
+                var otherCenterPos = new Vector2(player.X + Player.WIDTH / 2, player.Y + Player.HEIGHT / 2);
+
+                // TODO: update with a circle collision using centers of players above, and Player.RADIUS
+
+                if (player.X == chaser.Value.X && player.Y == chaser.Value.Y)
+                {
+                    _timeAtLastTag = _elapsedTime;
+
+                    player.IsChaser = true;
+                    chaser.Value.IsChaser = false;
+
+                    continue;
+                }
+            }
+        }
+
+        #endregion
 
         #region Output to clients
 
@@ -125,6 +185,7 @@ namespace GameBackend.Services
 
             _disconnectedPlayers = new();
 
+            // TODO: Can I just send an array over the wire instead of sending each player individually?
             foreach (var (id, player) in _players)
                 await BroadcastPlayerInformation(id, player);
         }

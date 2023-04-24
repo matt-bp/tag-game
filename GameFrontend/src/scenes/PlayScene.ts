@@ -7,6 +7,7 @@ import Keyboard from "../io/keyboard";
 import { rectangularCollision } from "../collisions";
 import Connection, { ArgsToIncomingMessages } from "../io/connection";
 import { Direction } from "../helpers/direction";
+import { circle } from "../graphics/drawing";
 
 const indexIntoCollisions = (row: number, col: number) => {
     const index = col * collisions.width + row;
@@ -116,7 +117,7 @@ export default class PlayScene implements IScene {
     update = () => {
         this.processInput();
 
-        this.detectCollisions();
+        this.detectBoundaryCollisions();
 
         this.sendPositionToServer();
 
@@ -128,7 +129,19 @@ export default class PlayScene implements IScene {
 
         this.#worldSprites["map"].draw(ctx, this.#camera);
 
-        this.getCurrentSprite()?.draw(ctx, this.#camera);
+        const player = this.getCurrentSprite();
+        player?.draw(ctx, this.#camera);
+
+        if (player) {
+            circle(
+                ctx,
+                player.x + player.getWidth() / 2,
+                player.y + player.getHeight() / 2,
+                60,
+                60
+            );
+            console.log(player.getWidth(), player.getHeight());
+        }
 
         var keys = Object.keys(this.#otherPlayers);
         for (let i = 0; i < keys.length; i++) {
@@ -218,7 +231,7 @@ export default class PlayScene implements IScene {
         }
     };
 
-    private detectCollisions = () => {
+    private detectBoundaryCollisions = () => {
         const currentSprite = this.getCurrentSprite();
 
         if (!currentSprite || !this.#camera) return;
