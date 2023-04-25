@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace GameBackend.Models
 {
     public class Player
@@ -10,5 +12,6 @@ namespace GameBackend.Models
         public string Direction { get; set; }
         public bool DidMove { get; set; }
         public bool IsChaser { get; set; }
+        public Vector2 CenterPosition => new(X + WIDTH / 2, Y + HEIGHT / 2);
     }
 }

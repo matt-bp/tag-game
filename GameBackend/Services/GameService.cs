@@ -157,19 +157,17 @@ namespace GameBackend.Services
                 if (id == chaser.Key) // Don't tag ourselves
                     continue;
 
-                var chaserCenterPos = new Vector2(chaser.Value.X + Player.WIDTH / 2, chaser.Value.Y + Player.HEIGHT / 2);
-                var otherCenterPos = new Vector2(player.X + Player.WIDTH / 2, player.Y + Player.HEIGHT / 2);
+                var chaserCenterPos = chaser.Value.CenterPosition;
+                var otherCenterPos = player.CenterPosition;
 
-                // TODO: update with a circle collision using centers of players above, and Player.RADIUS
-
-                if (player.X == chaser.Value.X && player.Y == chaser.Value.Y)
+                if (Vector2.Distance(chaserCenterPos, otherCenterPos) < Player.RADIUS)
                 {
                     _timeAtLastTag = _elapsedTime;
 
                     player.IsChaser = true;
                     chaser.Value.IsChaser = false;
 
-                    continue;
+                    return; // Only check for it once per frame
                 }
             }
         }
@@ -190,7 +188,7 @@ namespace GameBackend.Services
                 await BroadcastPlayerInformation(id, player);
         }
 
-        private async Task BroadcastPlayerInformation(string id, Player player) => await _hub.Clients.All.SendAsync("PlayerMoved", id, player.X, player.Y, player.Direction, player.DidMove);
+        private async Task BroadcastPlayerInformation(string id, Player player) => await _hub.Clients.All.SendAsync("PlayerMoved", id, player.X, player.Y, player.Direction, player.DidMove, player.IsChaser);
 
         private async Task BroadcastDisconnectedPlayer(string id) => await _hub.Clients.All.SendAsync("PlayerLeft", id);
 

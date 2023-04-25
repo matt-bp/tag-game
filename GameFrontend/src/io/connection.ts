@@ -6,7 +6,7 @@ type ServerIncomingMessages = "PlayerLeft" | "PlayerMoved";
 
 export type ArgsToIncomingMessages = {
     PlayerLeft: [string];
-    PlayerMoved: [string, number, number, Direction, boolean];
+    PlayerMoved: [string, number, number, Direction, boolean, boolean];
 };
 
 export default class Connection {
@@ -48,7 +48,11 @@ export default class Connection {
 
     private addIncomingToQueue(methodName: ServerIncomingMessages) {
         this.connection.on(methodName, (...args) => {
-            if (args[0] == this.getConnectionId()) return; // If we're getting a message about ourselves, ignore it
+            if (
+                methodName != "PlayerMoved" &&
+                args[0] == this.getConnectionId()
+            )
+                return; // If we're getting a message about ourselves, ignore it
 
             this.messageQueue.push([methodName, args]);
         });

@@ -67,6 +67,7 @@ export default class PlayScene implements IScene {
     #playerSpeed: number = 3;
     #connection: Connection = new Connection("/api/game-hub");
     #didSendStoppedMoving: boolean = false;
+    #whoIsChaser: string = "";
 
     constructor(
         private readonly width: number,
@@ -133,6 +134,11 @@ export default class PlayScene implements IScene {
         player?.draw(ctx, this.#camera);
 
         if (player) {
+            if (this.#whoIsChaser === this.#connection.getConnectionId()) {
+                ctx.strokeStyle = "red";
+            } else {
+                ctx.strokeStyle = "black";
+            }
             circle(
                 ctx,
                 player.x + player.getWidth() / 2,
@@ -140,12 +146,27 @@ export default class PlayScene implements IScene {
                 60,
                 60
             );
-            console.log(player.getWidth(), player.getHeight());
         }
 
         var keys = Object.keys(this.#otherPlayers);
         for (let i = 0; i < keys.length; i++) {
-            this.#otherPlayers[keys[i]].draw(ctx, this.#camera);
+            const otherSprite = this.#otherPlayers[keys[i]];
+            otherSprite.draw(ctx, this.#camera);
+
+            if (this.#whoIsChaser === keys[i]) {
+                ctx.strokeStyle = "red";
+            } else {
+                ctx.strokeStyle = "black";
+            }
+
+            throw new Error("Method not implemented."); // Circles aren't drawing
+            circle(
+                ctx,
+                otherSprite.x + otherSprite.getWidth() / 2,
+                otherSprite.y + otherSprite.getHeight() / 2,
+                60,
+                60
+            );
         }
 
         this.#worldSprites["map_foreground"].draw(ctx, this.#camera);
@@ -293,8 +314,15 @@ export default class PlayScene implements IScene {
         x: number,
         y: number,
         direction: Direction,
-        otherDidMove: boolean
+        otherDidMove: boolean,
+        isChaser: boolean
     ) => {
+        if (isChaser) {
+            this.#whoIsChaser = otherId;
+        }
+
+        if (otherId == this.#connection.getConnectionId()) return;
+
         if (
             !this.#otherPlayers[otherId] ||
             direction != this.#otherPlayersDirection[otherId]
