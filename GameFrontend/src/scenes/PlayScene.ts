@@ -131,42 +131,50 @@ export default class PlayScene implements IScene {
         this.#worldSprites["map"].draw(ctx, this.#camera);
 
         const player = this.getCurrentSprite();
-        player?.draw(ctx, this.#camera);
 
-        if (player) {
-            if (this.#whoIsChaser === this.#connection.getConnectionId()) {
-                ctx.strokeStyle = "red";
-            } else {
-                ctx.strokeStyle = "black";
+        this.updateEffectBasedOnChaser(
+            ctx,
+            this.#connection.getConnectionId() ?? "",
+            () => {
+                if (!this.#camera) return;
+                player?.draw(ctx, this.#camera);
             }
-            circle(
-                ctx,
-                player.x + player.getWidth() / 2,
-                player.y + player.getHeight() / 2,
-                60,
-                60
-            );
-        }
+        );
+
+        // if (player) {
+        //     if (this.#whoIsChaser === this.#connection.getConnectionId()) {
+        //         ctx.strokeStyle = "red";
+        //     } else {
+        //         ctx.strokeStyle = "black";
+        //     }
+        //     circle(
+        //         ctx,
+        //         player.x + player.getWidth() / 2,
+        //         player.y + player.getHeight() / 2,
+        //         60,
+        //         60
+        //     );
+        // }
 
         var keys = Object.keys(this.#otherPlayers);
         for (let i = 0; i < keys.length; i++) {
             const otherSprite = this.#otherPlayers[keys[i]];
-            otherSprite.draw(ctx, this.#camera);
 
-            if (this.#whoIsChaser === keys[i]) {
-                ctx.strokeStyle = "red";
-            } else {
-                ctx.strokeStyle = "black";
-            }
+            this.updateEffectBasedOnChaser(ctx, keys[i], () => {
+                if (!this.#camera) return;
+                otherSprite.draw(ctx, this.#camera);
+            });
 
-            throw new Error("Method not implemented."); // Circles aren't drawing
-            circle(
-                ctx,
-                otherSprite.x + otherSprite.getWidth() / 2,
-                otherSprite.y + otherSprite.getHeight() / 2,
-                60,
-                60
-            );
+            //throw new Error("Method not implemented."); // Circles aren't drawing
+            // circle(
+            //     ctx,
+            //     otherSprite.x + otherSprite.getWidth() / 2 - this.#camera.x,
+            //     otherSprite.y + otherSprite.getHeight() / 2 - this.#camera.y,
+            //     60,
+            //     60
+            // );
+
+            ctx.filter = "none";
         }
 
         this.#worldSprites["map_foreground"].draw(ctx, this.#camera);
@@ -174,6 +182,22 @@ export default class PlayScene implements IScene {
         for (let boundary of this.#boundaries) {
             boundary.draw(ctx, this.#camera);
         }
+    };
+
+    private updateEffectBasedOnChaser = (
+        ctx: CanvasRenderingContext2D,
+        key: string,
+        drawCall: () => void
+    ) => {
+        if (this.#whoIsChaser === key) {
+            ctx.filter = "hue-rotate(180deg) drop-shadow(0px 16px 10px black)";
+        } else {
+            ctx.filter = "none";
+        }
+
+        drawCall();
+
+        ctx.filter = "none";
     };
 
     private getCurrentSprite = () => {
