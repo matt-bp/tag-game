@@ -1,6 +1,5 @@
 import "./style.css";
-import PlayScreen from "./scenes/PlayScene";
-import { IScene } from "./scenes/IScene";
+import SceneManager from "./scenes/SceneManager";
 
 const canvas = document.querySelector("#app") as HTMLCanvasElement;
 
@@ -14,16 +13,14 @@ if (!canvas) {
     if (!ctx) {
         console.error("Context not initialized");
     } else {
-        const scene: IScene = new PlayScreen(canvas.width, canvas.height);
-
-        scene.startup();
+        const sceneManager = new SceneManager(canvas.width, canvas.height);
 
         const animate = () => {
-            scene.update();
+            sceneManager.getCurrentScene().update();
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            scene.render(ctx);
+            sceneManager.getCurrentScene().render(ctx);
 
             requestAnimationFrame(animate);
         };

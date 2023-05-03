@@ -35,6 +35,11 @@ export default class Connection {
         }
     };
 
+    public end: () => Promise<void> = async () => {
+        await this.connection.stop();
+        this.connected = false;
+    };
+
     public send: (
         type: ServerOutgoingMessages,
         ...args: any[]

@@ -7,7 +7,6 @@ import Keyboard from "../io/keyboard";
 import { rectangularCollision } from "../collisions";
 import Connection, { ArgsToIncomingMessages } from "../io/connection";
 import { Direction } from "../helpers/direction";
-import { circle } from "../graphics/drawing";
 
 const indexIntoCollisions = (row: number, col: number) => {
     const index = col * collisions.width + row;
@@ -72,9 +71,7 @@ export default class PlayScene implements IScene {
     constructor(
         private readonly width: number,
         private readonly height: number
-    ) {}
-
-    startup = () => {
+    ) {
         this.#worldSprites["map"] = new Sprite({
             url: "/assets/GameMap.png",
             x: 0,
@@ -105,14 +102,13 @@ export default class PlayScene implements IScene {
         );
 
         this.#camera = new Camera(390, 700);
-
         this.#keyboard = new Keyboard();
-
         this.#connection.start();
-    };
+    }
 
-    end = () => {
+    end: () => Promise<void> = async () => {
         this.#keyboard?.dispose();
+        await this.#connection.end();
     };
 
     update = () => {
@@ -141,21 +137,6 @@ export default class PlayScene implements IScene {
             }
         );
 
-        // if (player) {
-        //     if (this.#whoIsChaser === this.#connection.getConnectionId()) {
-        //         ctx.strokeStyle = "red";
-        //     } else {
-        //         ctx.strokeStyle = "black";
-        //     }
-        //     circle(
-        //         ctx,
-        //         player.x + player.getWidth() / 2,
-        //         player.y + player.getHeight() / 2,
-        //         60,
-        //         60
-        //     );
-        // }
-
         var keys = Object.keys(this.#otherPlayers);
         for (let i = 0; i < keys.length; i++) {
             const otherSprite = this.#otherPlayers[keys[i]];
@@ -164,15 +145,6 @@ export default class PlayScene implements IScene {
                 if (!this.#camera) return;
                 otherSprite.draw(ctx, this.#camera);
             });
-
-            //throw new Error("Method not implemented."); // Circles aren't drawing
-            // circle(
-            //     ctx,
-            //     otherSprite.x + otherSprite.getWidth() / 2 - this.#camera.x,
-            //     otherSprite.y + otherSprite.getHeight() / 2 - this.#camera.y,
-            //     60,
-            //     60
-            // );
 
             ctx.filter = "none";
         }

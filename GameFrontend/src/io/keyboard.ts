@@ -12,7 +12,7 @@ export default class Keyboard {
     };
 
     #onKeyUp = (ev: KeyboardEvent) => {
-        this.keyPressed[ev.key] = false;
+        delete this.keyPressed[ev.key];
     };
 
     public dispose() {
