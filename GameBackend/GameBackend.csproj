@@ -1,13 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <FrontEndRoot>../GameFrontend/</FrontEndRoot>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+    <ItemGroup>
+        <Folder Include="wwwroot\" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
+    <Target Name="PublishRunPmpn" AfterTargets="ComputeFilesToPublish">
+        <Message Importance="high" Text="Game frontend: Publishing files..." />
+        <Exec WorkingDirectory="$(FrontEndRoot)" Command="pnpm --version" ContinueOnError="false" />
+        <Message Importance="low" Text="Sound Wall: Working directory, $(FrontEndRoot)" />
+        <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
+        <Exec WorkingDirectory="$(FrontEndRoot)" Command="pnpm build" />
 
+        <!-- Include the newly-built files in the publish output -->
+        <ItemGroup>
+            <DistFiles Include="$(FrontEndRoot)dist\**" />
+            <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+                <RelativePath>wwwroot\%(RecursiveDir)%(FileName)%(Extension)</RelativePath>
+                <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+                <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+            </ResolvedFileToPublish>
+        </ItemGroup>
+
+        <Message Importance="high" Text="Game frontend: Publish complete" />
+    </Target>
 </Project>

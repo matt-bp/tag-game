@@ -28,3 +28,6 @@ GameBackend/obj
 GameBackend/wwwroot/
 GameFrontend/obj
 .vs
+/GameBackend/Properties/PublishProfiles/Publish to Matt Sandbox.pubxml.user
+/GameBackend/Properties/PublishProfiles/Publish to Matt Sandbox.pubxml
+*.csproj.user
