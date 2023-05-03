@@ -70,7 +70,8 @@ export default class PlayScene implements IScene {
 
     constructor(
         private readonly width: number,
-        private readonly height: number
+        private readonly height: number,
+        private readonly next: () => void
     ) {
         this.#worldSprites["map"] = new Sprite({
             url: "/assets/GameMap.png",
@@ -186,6 +187,10 @@ export default class PlayScene implements IScene {
         let direction = { x: 0, y: 0 };
 
         this.#didPlayerMove = false;
+
+        if (this.#keyboard?.keyPressed["Escape"]) {
+            this.next();
+        }
 
         if (this.#keyboard?.keyPressed["s"]) {
             this.#playerDirection = "down";

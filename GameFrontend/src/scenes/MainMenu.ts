@@ -60,8 +60,25 @@ export default class MainMenu implements IScene {
         ctx.restore();
 
         text(ctx, 10, 10, "Tag", "2rem Arial");
-        text(ctx, 10, 50, "You'll play tag with your friends!");
+        text(ctx, 10, 45, "You'll play tag with your friends!");
+
         text(ctx, 10, 100, "Type username and press enter to join:");
         text(ctx, 10, 125, this.#input, "1rem Arial", "red");
+
+        text(
+            ctx,
+            10,
+            300,
+            "Use WASD to move around, press Escape to exit back to this screen."
+        );
+
+        text(
+            ctx,
+            10,
+            400,
+            "How to win: spend the least amount of time as the chaser, or as the chaser, tag more than 10 people, or be the only chaser."
+        );
+        text(ctx, 10, 450, "Rounds last 1 minute.");
+        text(ctx, 10, 500, "Starts after 3 players have joined");
     }
 }

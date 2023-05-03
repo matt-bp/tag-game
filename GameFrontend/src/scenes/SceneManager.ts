@@ -3,6 +3,8 @@ import { IScene } from "./IScene";
 import MainMenu from "./MainMenu";
 import PlayScene from "./PlayScene";
 
+type Scene = "Menu" | "Play";
+
 export default class SceneManager {
     #scene: IScene;
 
@@ -10,28 +12,41 @@ export default class SceneManager {
         private readonly width: number,
         private readonly height: number
     ) {
-        let username = localStorage.getItem(STORAGE_USERNAME) || "";
-        this.#scene = new MainMenu(
-            username,
-            width,
-            height,
-            this.transition("Menu")
-        );
+        this.#scene = this.createMainMenu();
     }
 
     getCurrentScene = () => {
         return this.#scene;
     };
 
-    private transition = (from: "Menu") => {
+    private transition = (from: Scene) => {
         if (from == "Menu") {
-            return (value: string) => {
-                localStorage.setItem(STORAGE_USERNAME, value);
+            return (value?: string) => {
+                localStorage.setItem(STORAGE_USERNAME, value ?? "");
                 this.#scene.end();
-                this.#scene = new PlayScene(this.width, this.height);
+                this.#scene = this.createPlayScene();
+            };
+        } else if (from == "Play") {
+            return () => {
+                this.#scene.end();
+                this.#scene = this.createMainMenu();
             };
         }
 
         throw new Error("Not implemented");
+    };
+
+    private createMainMenu = () => {
+        let username = localStorage.getItem(STORAGE_USERNAME) || "";
+        return new MainMenu(
+            username,
+            this.width,
+            this.height,
+            this.transition("Menu")
+        );
+    };
+
+    private createPlayScene = () => {
+        return new PlayScene(this.width, this.height, this.transition("Play"));
     };
 }
