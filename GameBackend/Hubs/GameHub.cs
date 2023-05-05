@@ -24,6 +24,12 @@ public class GameHub : Hub
         Direction = direction
     });
 
+    public void NewUsername(string username) => _backgroundJobs.Usernames.Enqueue(new UsernameJob
+    {
+        ConnectionId = Context.ConnectionId,
+        Username = username
+    });
+
     public void Stop() => _backgroundJobs.PlayersThatStoppedMoving.Enqueue(new IdJob { ConnectionId = Context.ConnectionId });
 
     public override Task OnConnectedAsync()

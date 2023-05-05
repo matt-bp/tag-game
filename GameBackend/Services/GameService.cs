@@ -15,6 +15,7 @@ namespace GameBackend.Services
         private List<string> _disconnectedPlayers = new();
         private double _elapsedTime = 0;
         private double _timeAtLastTag = 0;
+        private (string Message, double timeToShow) _serverMessage = (string.Empty, 0);
 
         private bool _shutDown = false;
 
@@ -53,13 +54,13 @@ namespace GameBackend.Services
             while (!_shutDown)
             {
                 DateTime endTime = DateTime.Now;
-                var timeBetweenFrames = (endTime - startTime).TotalMilliseconds;
+                var dt = (endTime - startTime).TotalMilliseconds;
                 startTime = endTime;
-                _elapsedTime += timeBetweenFrames;
+                _elapsedTime += dt;
 
                 HandleInput();
 
-                UpdateGameState();
+                UpdateGameState(dt);
 
                 await SendGameStateToClients();
 
@@ -90,6 +91,11 @@ namespace GameBackend.Services
             {
                 _disconnectedPlayers.Add(job.ConnectionId);
                 _players.Remove(job.ConnectionId);
+            }
+
+            while (_backgroundCollisionJobs.Usernames.TryDequeue(out var job))
+            {
+                _players[job.ConnectionId].Username = job.Username;
             }
         }
 
@@ -123,11 +129,13 @@ namespace GameBackend.Services
 
         #region Update Game State
 
-        private void UpdateGameState()
+        private void UpdateGameState(double dt)
         {
             SetPlayerAsIt();
 
             CheckForPlayerCollisions();
+
+            UpdateServerMessage(dt);
         }
 
         private void SetPlayerAsIt()
@@ -140,6 +148,9 @@ namespace GameBackend.Services
 
             var randomPlayer = _players.ElementAt(new Random().Next(0, _players.Count));
             randomPlayer.Value.IsChaser = true;
+
+            // TODO: Set new chaser message
+            _serverMessage = ("New chaser: " + randomPlayer.Value.Username, 5000);
         }
 
         private void CheckForPlayerCollisions()
@@ -160,16 +171,32 @@ namespace GameBackend.Services
                 var chaserCenterPos = chaser.Value.CenterPosition;
                 var otherCenterPos = player.CenterPosition;
 
-                if (Vector2.Distance(chaserCenterPos, otherCenterPos) < Player.RADIUS)
-                {
-                    _timeAtLastTag = _elapsedTime;
+                if (Vector2.Distance(chaserCenterPos, otherCenterPos) >= Player.RADIUS)
+                    continue;
+                
+                _timeAtLastTag = _elapsedTime;
 
-                    player.IsChaser = true;
-                    chaser.Value.IsChaser = false;
+                player.IsChaser = true;
+                chaser.Value.IsChaser = false;
 
-                    return; // Only check for it once per frame
-                }
+                _serverMessage = ("New chaser: " + player.Username, 5000);
+
+                return; // Only check for new chaser once per frame
             }
+        }
+
+        private void UpdateServerMessage(double dt)
+        {
+            if (string.IsNullOrEmpty(_serverMessage.Message)) return;
+
+            _serverMessage.timeToShow -= dt;
+
+            if (_serverMessage.timeToShow > 0)
+            {
+                return;
+            }
+
+            _serverMessage = (string.Empty, 0);
         }
 
         #endregion
@@ -186,11 +213,15 @@ namespace GameBackend.Services
             // TODO: Can I just send an array over the wire instead of sending each player individually?
             foreach (var (id, player) in _players)
                 await BroadcastPlayerInformation(id, player);
+
+            await BroadcastServerMessage(_serverMessage.Message);
         }
 
-        private async Task BroadcastPlayerInformation(string id, Player player) => await _hub.Clients.All.SendAsync("PlayerMoved", id, player.X, player.Y, player.Direction, player.DidMove, player.IsChaser);
+        private async Task BroadcastPlayerInformation(string id, Player player) => await _hub.Clients.All.SendAsync("PlayerMoved", id, player.Username, player.X, player.Y, player.Direction, player.DidMove, player.IsChaser);
 
         private async Task BroadcastDisconnectedPlayer(string id) => await _hub.Clients.All.SendAsync("PlayerLeft", id);
+
+        private async Task BroadcastServerMessage(string message) => await _hub.Clients.All.SendAsync("ServerMessage", message);
 
         #endregion
     }

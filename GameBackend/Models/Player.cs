@@ -4,6 +4,7 @@ namespace GameBackend.Models
 {
     public class Player
     {
+        public string Username { get; set; }
         public const int RADIUS = 60;
         public const int WIDTH = 48;
         public const int HEIGHT = 68;

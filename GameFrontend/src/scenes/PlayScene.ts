@@ -7,6 +7,7 @@ import Keyboard from "../io/keyboard";
 import { rectangularCollision } from "../collisions";
 import Connection, { ArgsToIncomingMessages } from "../io/connection";
 import { Direction } from "../helpers/direction";
+import { text } from "../graphics/drawing";
 
 const indexIntoCollisions = (row: number, col: number) => {
     const index = col * collisions.width + row;
@@ -56,6 +57,8 @@ export default class PlayScene implements IScene {
     #otherPlayers: Record<string, Sprite> = {};
     #otherPlayersDirection: Record<string, Direction> = {};
     #otherPlayerDidMove: Record<string, boolean> = {};
+    #otherPlayerUsername: Record<string, string> = {};
+
     #worldSprites: Record<string, Sprite> = {};
     #boundaries: Boundary[] = [];
     #playerDirection: Direction = "down";
@@ -67,8 +70,10 @@ export default class PlayScene implements IScene {
     #connection: Connection = new Connection("/api/game-hub");
     #didSendStoppedMoving: boolean = false;
     #whoIsChaser: string = "";
+    #serverMessage: string = "";
 
     constructor(
+        private readonly username: string,
         private readonly width: number,
         private readonly height: number,
         private readonly next: () => void
@@ -104,7 +109,9 @@ export default class PlayScene implements IScene {
 
         this.#camera = new Camera(390, 700);
         this.#keyboard = new Keyboard();
-        this.#connection.start();
+        this.#connection.start().then(() => {
+            this.sendUsernameToServer(username);
+        });
     }
 
     end: () => Promise<void> = async () => {
@@ -133,8 +140,17 @@ export default class PlayScene implements IScene {
             ctx,
             this.#connection.getConnectionId() ?? "",
             () => {
-                if (!this.#camera) return;
-                player?.draw(ctx, this.#camera);
+                if (!this.#camera || !player) return;
+
+                player.draw(ctx, this.#camera);
+
+                text(
+                    ctx,
+                    player.x + 10,
+                    player.y - 20,
+                    this.username,
+                    "20px Arial"
+                );
             }
         );
 
@@ -145,6 +161,14 @@ export default class PlayScene implements IScene {
             this.updateEffectBasedOnChaser(ctx, keys[i], () => {
                 if (!this.#camera) return;
                 otherSprite.draw(ctx, this.#camera);
+
+                text(
+                    ctx,
+                    otherSprite.x + 10 - this.#camera.x,
+                    otherSprite.y - 20 - this.#camera.y,
+                    this.#otherPlayerUsername[keys[i]],
+                    "20px Arial"
+                );
             });
 
             ctx.filter = "none";
@@ -155,6 +179,8 @@ export default class PlayScene implements IScene {
         for (let boundary of this.#boundaries) {
             boundary.draw(ctx, this.#camera);
         }
+
+        text(ctx, 10, 10, this.#serverMessage, "40px Arial", "#FFFFFF");
     };
 
     private updateEffectBasedOnChaser = (
@@ -236,6 +262,12 @@ export default class PlayScene implements IScene {
                 );
                 continue;
             }
+            if (message[0] == "ServerMessage") {
+                this.handleServerMessage(
+                    ...(message[1] as ArgsToIncomingMessages["ServerMessage"])
+                );
+                continue;
+            }
             throw new Error(`Unknown message type: ${message[0]}`);
         }
         this.#connection.messageQueue = [];
@@ -312,6 +344,7 @@ export default class PlayScene implements IScene {
 
     private handlePlayerMoved = (
         otherId: string,
+        username: string,
         x: number,
         y: number,
         direction: Direction,
@@ -346,10 +379,15 @@ export default class PlayScene implements IScene {
             this.#otherPlayersDirection[otherId] = direction;
         }
 
+        this.#otherPlayerUsername[otherId] = username;
         this.#otherPlayerDidMove[otherId] = otherDidMove;
 
         this.#otherPlayers[otherId].x = x;
         this.#otherPlayers[otherId].y = y;
+    };
+
+    private handleServerMessage = (message: string) => {
+        this.#serverMessage = message;
     };
 
     private sendPositionToServer = () => {
@@ -375,5 +413,11 @@ export default class PlayScene implements IScene {
             this.#camera.y + current.y,
             this.#playerDirection
         );
+    };
+
+    private sendUsernameToServer = (username: string) => {
+        if (!this.#connection.connected) return;
+
+        this.#connection.send("NewUsername", username);
     };
 }

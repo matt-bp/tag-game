@@ -24,7 +24,7 @@ export default class SceneManager {
             return (value?: string) => {
                 localStorage.setItem(STORAGE_USERNAME, value ?? "");
                 this.#scene.end();
-                this.#scene = this.createPlayScene();
+                this.#scene = this.createPlayScene(value ?? "");
             };
         } else if (from == "Play") {
             return () => {
@@ -46,7 +46,12 @@ export default class SceneManager {
         );
     };
 
-    private createPlayScene = () => {
-        return new PlayScene(this.width, this.height, this.transition("Play"));
+    private createPlayScene = (username: string) => {
+        return new PlayScene(
+            username,
+            this.width,
+            this.height,
+            this.transition("Play")
+        );
     };
 }

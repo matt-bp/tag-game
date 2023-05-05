@@ -1,12 +1,13 @@
 import * as signalR from "@microsoft/signalr";
 import { Direction } from "../helpers/direction";
 
-type ServerOutgoingMessages = "Move" | "Stop";
-type ServerIncomingMessages = "PlayerLeft" | "PlayerMoved";
+type ServerOutgoingMessages = "Move" | "Stop" | "NewUsername";
+type ServerIncomingMessages = "PlayerLeft" | "PlayerMoved" | "ServerMessage";
 
 export type ArgsToIncomingMessages = {
     PlayerLeft: [string];
-    PlayerMoved: [string, number, number, Direction, boolean, boolean];
+    PlayerMoved: [string, string, number, number, Direction, boolean, boolean];
+    ServerMessage: [string];
 };
 
 export default class Connection {
@@ -23,6 +24,7 @@ export default class Connection {
     #initQueueSources = () => {
         this.addIncomingToQueue("PlayerLeft");
         this.addIncomingToQueue("PlayerMoved");
+        this.addIncomingToQueue("ServerMessage");
     };
 
     public start: () => Promise<void> = async () => {
