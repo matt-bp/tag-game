@@ -148,6 +148,7 @@ namespace GameBackend.Services
 
             var randomPlayer = _players.ElementAt(new Random().Next(0, _players.Count));
             randomPlayer.Value.IsChaser = true;
+            _timeAtLastTag = _elapsedTime;
 
             // TODO: Set new chaser message
             _serverMessage = ("New chaser: " + randomPlayer.Value.Username, 5000);

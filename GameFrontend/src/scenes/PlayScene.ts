@@ -66,7 +66,8 @@ export default class PlayScene implements IScene {
     #camera: Camera | undefined;
     #keyboard: Keyboard | undefined;
     #didPlayerMove: boolean = false;
-    #playerSpeed: number = 3;
+    #regularPlayerSpeed: number = 3;
+    #chaserPlayerSpeed: number = 4;
     #connection: Connection = new Connection("/api/game-hub");
     #didSendStoppedMoving: boolean = false;
     #whoIsChaser: string = "";
@@ -209,6 +210,14 @@ export default class PlayScene implements IScene {
         this.processNetworkInput();
     };
 
+    private getPlayerSpeed = () => {
+        if (this.#whoIsChaser == this.#connection.getConnectionId()) {
+            return this.#chaserPlayerSpeed;
+        } else {
+            return this.#regularPlayerSpeed;
+        }
+    };
+
     private processKeyboardInput = () => {
         let direction = { x: 0, y: 0 };
 
@@ -221,25 +230,25 @@ export default class PlayScene implements IScene {
         if (this.#keyboard?.keyPressed["s"]) {
             this.#playerDirection = "down";
             this.#didPlayerMove = true;
-            direction.y += this.#playerSpeed;
+            direction.y += this.getPlayerSpeed();
         }
 
         if (this.#keyboard?.keyPressed["w"]) {
             this.#playerDirection = "up";
             this.#didPlayerMove = true;
-            direction.y -= this.#playerSpeed;
+            direction.y -= this.getPlayerSpeed();
         }
 
         if (this.#keyboard?.keyPressed["d"]) {
             this.#playerDirection = "right";
             this.#didPlayerMove = true;
-            direction.x += this.#playerSpeed;
+            direction.x += this.getPlayerSpeed();
         }
 
         if (this.#keyboard?.keyPressed["a"]) {
             this.#playerDirection = "left";
             this.#didPlayerMove = true;
-            direction.x -= this.#playerSpeed;
+            direction.x -= this.getPlayerSpeed();
         }
 
         if (!this.#camera) return;
@@ -318,19 +327,19 @@ export default class PlayScene implements IScene {
         if (!this.#camera) return;
 
         if (this.#keyboard?.keyPressed["s"]) {
-            this.#camera.y -= this.#playerSpeed;
+            this.#camera.y -= this.getPlayerSpeed();
         }
 
         if (this.#keyboard?.keyPressed["w"]) {
-            this.#camera.y += this.#playerSpeed;
+            this.#camera.y += this.getPlayerSpeed();
         }
 
         if (this.#keyboard?.keyPressed["d"]) {
-            this.#camera.x -= this.#playerSpeed;
+            this.#camera.x -= this.getPlayerSpeed();
         }
 
         if (this.#keyboard?.keyPressed["a"]) {
-            this.#camera.x += this.#playerSpeed;
+            this.#camera.x += this.getPlayerSpeed();
         }
     };
 
