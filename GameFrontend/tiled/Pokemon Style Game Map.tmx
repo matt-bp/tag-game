@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.10.0" orientation="orthogonal" renderorder="right-down" width="70" height="40" tilewidth="12" tileheight="12" infinite="0" nextlayerid="19" nextobjectid="1">
  <editorsettings>
-  <export target="../public/assets/MapCollisions.json" format="json"/>
+  <export target="out/MapCollisionsNew.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="Pokemon Style Game.tsx"/>
  <tileset firstgid="1025" source="Collision.tsx"/>
- <group id="17" name="Objects" locked="1">
+ <group id="17" name="Objects" visible="0" locked="1">
   <layer id="1" name="Water" width="70" height="40" locked="1">
    <data encoding="csv">
 472,473,439,473,441,472,504,471,504,472,504,503,504,473,504,441,441,505,504,473,439,503,472,504,441,440,504,504,504,441,504,471,503,441,440,504,441,504,505,472,439,471,503,505,504,505,505,440,440,505,505,440,440,504,472,441,505,441,440,439,505,503,473,504,441,473,441,441,440,441,
@@ -579,7 +579,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="15" name="Collisions" width="70" height="40" visible="0" locked="1" opacity="0.49">
+ <layer id="15" name="Collisions" width="70" height="40" locked="1" opacity="0.49">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

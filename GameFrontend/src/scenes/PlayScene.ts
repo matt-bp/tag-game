@@ -80,7 +80,7 @@ export default class PlayScene implements IScene {
         private readonly next: () => void
     ) {
         this.#worldSprites["map"] = new Sprite({
-            url: "/assets/GameMapNew.png",
+            url: "/assets/GameMapFinal.png",
             x: 0,
             y: 0,
         });
