@@ -1,7 +1,7 @@
 import { IScene } from "./IScene";
 import { Sprite } from "../graphics/sprite";
 import { Boundary } from "../Boundary";
-import collisions from "../../data/collisions.json";
+import collisions from "../../data/collisions_new.json";
 import { Camera } from "../camera";
 import Keyboard from "../io/keyboard";
 import { rectangularCollision } from "../collisions";
@@ -80,7 +80,7 @@ export default class PlayScene implements IScene {
         private readonly next: () => void
     ) {
         this.#worldSprites["map"] = new Sprite({
-            url: "/assets/GameMap.png",
+            url: "/assets/GameMapNew.png",
             x: 0,
             y: 0,
         });
