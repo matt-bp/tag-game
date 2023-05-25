@@ -118,8 +118,8 @@ namespace GameBackend.Services
 
             _players.Add(job.ConnectionId, new Player
             {
-                X = 911,
-                Y = 988,
+                X = 0,
+                Y = 0,
                 Direction = "down",
                 DidMove = false,
             });

@@ -85,7 +85,7 @@ export default class PlayScene implements IScene {
             y: 0,
         });
         this.#worldSprites["map_foreground"] = new Sprite({
-            url: "/assets/GameMap_Foreground.png",
+            url: "/assets/GameMapFinalForeground.png",
             x: 0,
             y: 0,
         });
@@ -108,7 +108,7 @@ export default class PlayScene implements IScene {
             this.height / 2
         );
 
-        this.#camera = new Camera(390, 700);
+        this.#camera = new Camera(390, 1100);
         this.#keyboard = new Keyboard();
         this.#connection.start().then(() => {
             this.sendUsernameToServer(username);
@@ -177,9 +177,9 @@ export default class PlayScene implements IScene {
 
         this.#worldSprites["map_foreground"].draw(ctx, this.#camera);
 
-        for (let boundary of this.#boundaries) {
-            boundary.draw(ctx, this.#camera);
-        }
+        // for (let boundary of this.#boundaries) {
+        //     boundary.draw(ctx, this.#camera);
+        // }
 
         text(ctx, 10, 10, this.#serverMessage, "40px Arial", "#FFFFFF");
     };
