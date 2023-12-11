@@ -77,7 +77,7 @@ export default class PlayScene implements IScene {
         private readonly username: string,
         private readonly width: number,
         private readonly height: number,
-        private readonly next: () => void
+        private readonly next: (error?: string) => void
     ) {
         this.#worldSprites["map"] = new Sprite({
             url: "/assets/GameMapFinal.png",
@@ -110,9 +110,17 @@ export default class PlayScene implements IScene {
 
         this.#camera = new Camera(390, 1100);
         this.#keyboard = new Keyboard();
-        this.#connection.start().then(() => {
-            this.sendUsernameToServer(username);
-        });
+        this.#connection
+            .start()
+            .then(() => {
+                this.sendUsernameToServer(username);
+            })
+            .catch(() => {
+                console.log("Nqweqwf");
+                this.next(
+                    "A problem occured when connecting to the server, try again later!"
+                );
+            });
     }
 
     end: () => Promise<void> = async () => {
@@ -322,8 +330,6 @@ export default class PlayScene implements IScene {
     };
 
     private handleCollision = () => {
-        console.log("collision!");
-
         if (!this.#camera) return;
 
         if (this.#keyboard?.keyPressed["s"]) {

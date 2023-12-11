@@ -11,7 +11,8 @@ export default class MainMenu implements IScene {
         initialUsername: string,
         private readonly width: number,
         private readonly height: number,
-        private readonly next: (value: string) => void
+        private readonly next: (value: string) => void,
+        private readonly error?: string
     ) {
         this.#input = initialUsername;
         this.#keyboard = new Keyboard();
@@ -71,6 +72,10 @@ export default class MainMenu implements IScene {
             300,
             "Use WASD to move around, press Escape to exit back to this screen."
         );
+
+        if (this.error) {
+            text(ctx, 10, 350, this.error);
+        }
 
         // text(
         //     ctx,

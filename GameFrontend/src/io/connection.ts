@@ -28,13 +28,9 @@ export default class Connection {
     };
 
     public start: () => Promise<void> = async () => {
-        try {
-            await this.connection.start();
-            this.connected = true;
-            this.#initQueueSources();
-        } catch (err: any) {
-            document.write(err);
-        }
+        await this.connection.start();
+        this.connected = true;
+        this.#initQueueSources();
     };
 
     public end: () => Promise<void> = async () => {

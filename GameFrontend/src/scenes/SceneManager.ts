@@ -19,7 +19,7 @@ export default class SceneManager {
         return this.#scene;
     };
 
-    private transition = (from: Scene) => {
+    private transition = (from: Scene, error?: string) => {
         if (from == "Menu") {
             return (value?: string) => {
                 localStorage.setItem(STORAGE_USERNAME, value ?? "");
@@ -29,29 +29,28 @@ export default class SceneManager {
         } else if (from == "Play") {
             return () => {
                 this.#scene.end();
-                this.#scene = this.createMainMenu();
+                this.#scene = this.createMainMenu(error);
             };
         }
 
         throw new Error("Not implemented");
     };
 
-    private createMainMenu = () => {
+    private createMainMenu = (error?: string) => {
         let username = localStorage.getItem(STORAGE_USERNAME) || "";
         return new MainMenu(
             username,
             this.width,
             this.height,
-            this.transition("Menu")
+            this.transition("Menu"),
+            error
         );
     };
 
     private createPlayScene = (username: string) => {
-        return new PlayScene(
-            username,
-            this.width,
-            this.height,
-            this.transition("Play")
-        );
+        return new PlayScene(username, this.width, this.height, (error) => {
+            console.log("hi ");
+            this.transition("Play", error)();
+        });
     };
 }
