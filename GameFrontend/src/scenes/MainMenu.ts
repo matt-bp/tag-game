@@ -90,17 +90,17 @@ export default class MainMenu implements IScene {
         ctx.fillStyle = "white";
 
         const containerWidth = 500;
-        const containerHeight = 450;
+        const containerHeight = 300;
         ctx.fillRect(
             (this.width - containerWidth) / 2,
-            this.height / 10,
+            (this.height - containerHeight) / 2,
             containerWidth,
             containerHeight
         );
 
         const center = this.width / 2;
         const textAlignLeft = center - 200;
-        const textAlignTopStart = 100;
+        const textAlignTopStart = 180;
         text(ctx, textAlignLeft, textAlignTopStart, "Tag", "2.5rem Arial");
         text(
             ctx,
@@ -135,7 +135,7 @@ export default class MainMenu implements IScene {
             text(
                 ctx,
                 textAlignLeft,
-                textAlignTopStart + 300,
+                textAlignTopStart + 220,
                 this.error,
                 "1rem Arial",
                 "red"
@@ -143,7 +143,7 @@ export default class MainMenu implements IScene {
         }
 
         const demoImageX = 580;
-        const demoImageY = 100;
+        const demoImageY = textAlignTopStart;
 
         // Border
         ctx.fillStyle = "black";
