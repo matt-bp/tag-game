@@ -117,9 +117,7 @@ export default class PlayScene implements IScene {
             })
             .catch(() => {
                 console.log("Nqweqwf");
-                this.next(
-                    "A problem occured when connecting to the server, try again later!"
-                );
+                this.next("A problem occured when connecting to the server.");
             });
     }
 
@@ -128,7 +126,7 @@ export default class PlayScene implements IScene {
         await this.#connection.end();
     };
 
-    update = () => {
+    update = (dt: number) => {
         this.processInput();
 
         this.detectBoundaryCollisions();

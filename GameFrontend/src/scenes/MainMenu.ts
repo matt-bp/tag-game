@@ -6,6 +6,12 @@ export default class MainMenu implements IScene {
     #keyboard: Keyboard | undefined;
     #input: string = "";
     #alreadyHandled: Record<string, boolean> = {};
+    #demoImage: HTMLImageElement;
+    #bgImage: HTMLImageElement;
+    #currentBgProgressX: number = 0;
+    #progressMultiplierX = 0.001;
+    #currentBgProgressY: number = 0;
+    #progressMultiplierY = 0.00001;
 
     constructor(
         initialUsername: string,
@@ -16,14 +22,28 @@ export default class MainMenu implements IScene {
     ) {
         this.#input = initialUsername;
         this.#keyboard = new Keyboard();
+        this.#demoImage = new Image();
+        this.#demoImage.src = "/assets/GameMapFinalSmall.png";
+        this.#bgImage = new Image();
+        this.#bgImage.src = "/assets/GameMapFinal.png";
     }
 
     end(): void {
         this.#keyboard?.dispose();
     }
 
-    update(): void {
+    update(dt: number): void {
         if (!this.#keyboard) return;
+
+        this.#currentBgProgressX += dt * this.#progressMultiplierX;
+        if (this.#currentBgProgressX > 1) {
+            this.#currentBgProgressX *= -1;
+        }
+
+        this.#currentBgProgressY += dt * this.#progressMultiplierY;
+        if (this.#currentBgProgressY > 1) {
+            this.#currentBgProgressY *= -1;
+        }
 
         if (this.#keyboard.keyPressed["Backspace"]) {
             this.#input = this.#input.slice(0, -1);
@@ -35,7 +55,7 @@ export default class MainMenu implements IScene {
 
             let keys = Object.keys(this.#keyboard.keyPressed);
             for (let i = 0; i < keys.length; i++) {
-                if (keys[i] == "Control") continue;
+                if (keys[i].length > 1) continue;
 
                 if (!this.#alreadyHandled[keys[i]]) {
                     this.#input += keys[i];
@@ -55,27 +75,86 @@ export default class MainMenu implements IScene {
     }
 
     render(ctx: CanvasRenderingContext2D): void {
+        // ctx.save();
+        // ctx.fillStyle = "white";
+        // ctx.fillRect(0, 0, this.width, this.height);
+        // ctx.restore();
+
         ctx.save();
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, this.width, this.height);
+        const bgImageX = this.#bgImage.width * this.#currentBgProgressX;
+        const bgImageY = this.#bgImage.height * this.#currentBgProgressY;
+        ctx.scale(0.5, 0.5);
+        ctx.drawImage(this.#bgImage, -bgImageX, -bgImageY);
         ctx.restore();
 
-        text(ctx, 10, 10, "Tag", "2rem Arial");
-        text(ctx, 10, 45, "You'll play tag with your friends!");
+        ctx.fillStyle = "white";
 
-        text(ctx, 10, 100, "Type username and press enter to join:");
-        text(ctx, 10, 125, this.#input, "1rem Arial", "red");
+        const containerWidth = 500;
+        const containerHeight = 450;
+        ctx.fillRect(
+            (this.width - containerWidth) / 2,
+            this.height / 10,
+            containerWidth,
+            containerHeight
+        );
+
+        const center = this.width / 2;
+        const textAlignLeft = center - 200;
+        const textAlignTopStart = 100;
+        text(ctx, textAlignLeft, textAlignTopStart, "Tag", "2.5rem Arial");
+        text(
+            ctx,
+            textAlignLeft,
+            textAlignTopStart + 75,
+            "You'll play tag with your friends!"
+        );
 
         text(
             ctx,
-            10,
-            300,
-            "Use WASD to move around, press Escape to exit back to this screen."
+            textAlignLeft,
+            textAlignTopStart + 150,
+            "Type your username and press enter to join:"
+        );
+        text(
+            ctx,
+            textAlignLeft,
+            textAlignTopStart + 180,
+            `>${this.#input}`,
+            "1rem Arial",
+            "#135200"
         );
 
+        // text(
+        //     ctx,
+        //     10,
+        //     300,
+        //     "Use WASD to move around, press Escape to exit back to this screen."
+        // );
+
         if (this.error) {
-            text(ctx, 10, 350, this.error);
+            text(
+                ctx,
+                textAlignLeft,
+                textAlignTopStart + 300,
+                this.error,
+                "1rem Arial",
+                "red"
+            );
         }
+
+        const demoImageX = 580;
+        const demoImageY = 100;
+
+        // Border
+        ctx.fillStyle = "black";
+        ctx.fillRect(
+            demoImageX - 2,
+            demoImageY - 2,
+            this.#demoImage.width + 4,
+            this.#demoImage.height + 4
+        );
+
+        ctx.drawImage(this.#demoImage, demoImageX, demoImageY);
 
         // text(
         //     ctx,

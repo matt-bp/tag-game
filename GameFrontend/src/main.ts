@@ -1,5 +1,6 @@
 import "./style.css";
 import SceneManager from "./scenes/SceneManager";
+import { makeUpdateLoop } from "./core/update-loop";
 
 const canvas = document.querySelector("#app") as HTMLCanvasElement;
 
@@ -15,16 +16,11 @@ if (!canvas) {
     } else {
         const sceneManager = new SceneManager(canvas.width, canvas.height);
 
-        const animate = () => {
-            sceneManager.getCurrentScene().update();
+        const loop = makeUpdateLoop(
+            (dt) => sceneManager.getCurrentScene().update(dt),
+            () => sceneManager.getCurrentScene().render(ctx)
+        );
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            sceneManager.getCurrentScene().render(ctx);
-
-            requestAnimationFrame(animate);
-        };
-
-        animate();
+        loop(0);
     }
 }
