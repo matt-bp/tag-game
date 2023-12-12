@@ -141,25 +141,27 @@ export default class PlayScene implements IScene {
 
         this.#worldSprites["map"].draw(ctx, this.#camera);
 
-        const player = this.getCurrentSprite();
+        if (this.username !== "demo") {
+            const player = this.getCurrentSprite();
 
-        this.updateEffectBasedOnChaser(
-            ctx,
-            this.#connection.getConnectionId() ?? "",
-            () => {
-                if (!this.#camera || !player) return;
+            this.updateEffectBasedOnChaser(
+                ctx,
+                this.#connection.getConnectionId() ?? "",
+                () => {
+                    if (!this.#camera || !player) return;
 
-                player.draw(ctx, this.#camera);
+                    player.draw(ctx, this.#camera);
 
-                text(
-                    ctx,
-                    player.x + 10,
-                    player.y - 20,
-                    this.username,
-                    "20px Arial"
-                );
-            }
-        );
+                    text(
+                        ctx,
+                        player.x,
+                        player.y - 20,
+                        this.username,
+                        "20px Arial"
+                    );
+                }
+            );
+        }
 
         var keys = Object.keys(this.#otherPlayers);
         for (let i = 0; i < keys.length; i++) {
